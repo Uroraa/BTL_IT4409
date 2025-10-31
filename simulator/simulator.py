@@ -2,8 +2,6 @@ import paho.mqtt.client as mqtt
 import random
 import time
 import json
-
-# Đọc cấu hình
 import os
 import json
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'config.json')
@@ -21,9 +19,9 @@ client = mqtt.Client(device_id)
 def connect_mqtt():
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("✅ Connected to MQTT Broker!")
+            print("Connected to MQTT Broker!")
         else:
-            print("❌ Failed to connect, return code %d\n", rc)
+            print("Failed to connect, return code %d\n", rc)
 
     client.on_connect = on_connect
     client.connect(broker, port)
@@ -31,7 +29,6 @@ def connect_mqtt():
 
 def publish(client):
     while True:
-        # Giả lập dữ liệu cảm biến
         temperature = round(random.uniform(25.0, 35.0), 2)
         humidity = round(random.uniform(40.0, 80.0), 2)
         
@@ -42,7 +39,7 @@ def publish(client):
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
         }
         client.publish(topic, json.dumps(message))
-        print(f"📤 Sent: {message}")
+        print(f"Sent: {message}")
         time.sleep(interval)
 
 def run():
