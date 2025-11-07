@@ -3,7 +3,7 @@ import random
 import time
 import json
 import os
-import json
+
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'config.json')
 with open(CONFIG_FILE, 'r') as f:
     config = json.load(f)
@@ -21,7 +21,7 @@ def connect_mqtt():
         if rc == 0:
             print("Connected to MQTT Broker!")
         else:
-            print("Failed to connect, return code %d\n", rc)
+            print("Failed to connect, code %d\n", rc)
 
     client.on_connect = on_connect
     client.connect(broker, port)
@@ -29,8 +29,8 @@ def connect_mqtt():
 
 def publish(client):
     while True:
-        temperature = round(random.uniform(25.0, 35.0), 2)
-        humidity = round(random.uniform(40.0, 80.0), 2)
+        temperature = round(random.uniform(20.0, 40.0), 2)
+        humidity = round(random.uniform(20.0, 90.0), 2)
         
         message = {
             "device_id": device_id,
