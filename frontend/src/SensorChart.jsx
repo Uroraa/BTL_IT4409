@@ -14,7 +14,7 @@ import './App.css';
 function SensorChart({ data }) {
   return (
     <div className="sensor-chart">
-      <h3>Biểu đồ Nhiệt độ</h3>
+      <h3>Biểu đồ Realtime</h3>
 
       <ResponsiveContainer width="100%" height="80%">
         <LineChart data={data}>
@@ -24,9 +24,9 @@ function SensorChart({ data }) {
           <Tooltip />
           <Legend />
 
-          <Line type="monotone" dataKey="temp" name="Nhiệt độ" stroke="#ff000dff" strokeWidth={2} />
-          <Line type="monotone" dataKey="humi" name="Độ ẩm" stroke="#0099ffff" strokeWidth={2} />
-          <Line type="monotone" dataKey="light" name="Ánh sáng" stroke="#ffff00" strokeWidth={2} />
+          <Line type="monotone" dataKey="temp" name="Nhiệt độ" stroke="#ff000de0" strokeWidth={2} />
+          <Line type="monotone" dataKey="humi" name="Độ ẩm" stroke="#0099ffd5" strokeWidth={2} />
+          <Line type="monotone" dataKey="light" name="Ánh sáng" stroke="#c9c919ff" strokeWidth={2} />
         </LineChart>
       </ResponsiveContainer>
     </div>
