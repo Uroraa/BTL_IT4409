@@ -8,6 +8,20 @@ function App() {
   const [sensors, setSensors] = useState([]);
   const [chartData, setChartData] = useState([]);
 
+  const [visibleLines, setVisibleLines] = useState({
+    temp: true,
+    humi: true,
+    light: true
+  });
+
+  // Toggle sensor
+  const handleToggle = (key) => {
+    setVisibleLines(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
   useEffect(() => {
     const mockData = [
       { id: 1, name: 'Nhiệt độ', value: '32°C' },
@@ -44,8 +58,37 @@ function App() {
           <SensorCard key={sensor.id} sensor={sensor} />
         ))}
       </div>
-        
-      <SensorChart data={chartData} />
+      
+      <div className="toggle-container">
+        <label>
+          <input
+            type="checkbox"
+            checked={visibleLines.temp}
+            onChange={() => handleToggle("temp")}
+          /> Nhiệt độ
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={visibleLines.humi}
+            onChange={() => handleToggle("humi")}
+          /> Độ ẩm
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={visibleLines.light}
+            onChange={() => handleToggle("light")}
+          /> Ánh sáng
+        </label>
+      </div>
+
+      <SensorChart
+        data={chartData}
+        visibleLines={visibleLines}
+      />
     </div>
   );
 }
