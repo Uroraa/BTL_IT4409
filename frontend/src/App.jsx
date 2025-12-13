@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import SensorCard from './SensorCard';
-import SensorChart from './SensorChart';
+import SensorCard from './components/SensorCard';
+import SensorChart from './components/SensorChart';
 import { getSensorData } from './api';
 import './App.css';
 
 function App() {
+  const [data, setData] = React.useState([]);
   const [sensors, setSensors] = useState([]);
   const [chartData, setChartData] = useState([]);
+
+  const fetchData = () => {
+    const url = `http://localhost:3001/api/data`;
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        setData(data.data);
+      })
+      .catch(err => console.error(err));
+  };
+  React.useEffect(() => {
+    fetchData();
+  }, []);
 
   const [visibleLines, setVisibleLines] = useState({
     temp: true,
@@ -14,7 +28,7 @@ function App() {
     light: true
   });
 
-  // Toggle sensor
+  // Toggle sensor  
   const handleToggle = (key) => {
     setVisibleLines(prev => ({
       ...prev,
@@ -30,14 +44,17 @@ function App() {
     ];
     setSensors(mockData);
 
-    const mockChart = [
-      { time: "10:00", temp: 25, humi: 55, light: 50 },
-      { time: "10:01", temp: 30, humi: 57, light: 77 },
-      { time: "10:02", temp: 27, humi: 60, light: 80 },
-      { time: "10:03", temp: 32, humi: 62, light: 90 }
-    ];
-    setChartData(mockChart);
+    // const mockChart = [
+    //   { time: "10:00", temp: 25, humi: 55, light: 50 },
+    //   { time: "10:01", temp: 30, humi: 57, light: 77 },
+    //   { time: "10:02", temp: 27, humi: 60, light: 80 },
+    //   { time: "10:03", temp: 32, humi: 62, light: 90 }
+    // ];
+
+    // setChartData(mockChart);
   }, []);
+
+
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -58,7 +75,7 @@ function App() {
           <SensorCard key={sensor.id} sensor={sensor} />
         ))}
       </div>
-      
+
       <div className="toggle-container">
         <label>
           <input
@@ -86,7 +103,7 @@ function App() {
       </div>
 
       <SensorChart
-        data={chartData}
+        data={data}
         visibleLines={visibleLines}
       />
     </div>

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   LineChart,
   Line,
@@ -9,7 +8,7 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
-import './App.css';
+import '../App.css';
 
 function SensorChart({ data, visibleLines }) {
   return (
@@ -19,7 +18,7 @@ function SensorChart({ data, visibleLines }) {
       <ResponsiveContainer width="100%" height="80%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-          <XAxis dataKey="time" stroke="#e7dcdcff" />
+          <XAxis dataKey="time.minute" stroke="#e7dcdcff" />
           <YAxis stroke="#aaa" />
           <Tooltip />
           <Legend />
