@@ -5,7 +5,6 @@ import { getSensorData } from './api';
 import './App.css';
 
 function App() {
-  const [data, setData] = React.useState([]);
   const [sensors, setSensors] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
@@ -17,7 +16,15 @@ function App() {
     humi: true,
     light: true
   });
-
+  //fetchData
+  let unsortedData = [];
+  const fetchData = () => {
+    const url = `http://localhost:3001/api/data?timeRange=${timeRange}`;
+    fetch(url)
+      .then(res => res.json())
+      .then(data => { unsortedData = Array.from(data.data) })
+      .catch(err => console.error(err))
+  }
   // Toggle sensor  
   const handleToggle = (key) => {
     setVisibleLines(prev => ({
@@ -33,6 +40,7 @@ function App() {
     return chartData;
   }, [chartData, timeRange]);
 
+  //Ham xu li xuat file
   const exportCSV = () => {
     if (chartData.length === 0) return;
 
@@ -75,21 +83,22 @@ function App() {
 
 
   useEffect(() => {
-    const mockData = [
-      { id: 1, name: 'Nhiệt độ', value: '32°C' },
-      { id: 2, name: 'Độ ẩm', value: '62%' },
-      { id: 3, name: 'Ánh sáng', value: '90 lux' },
-    ];
-    setSensors(mockData);
 
-    const mockChart = [
-      { time: "10:00", temp: 25, humi: 55, light: 50 },
-      { time: "10:01", temp: 30, humi: 57, light: 77 },
-      { time: "10:02", temp: 27, humi: 60, light: 80 },
-      { time: "10:03", temp: 32, humi: 62, light: 90 },
-      { time: "10:02", temp: 36, humi: 30, light: 40 }
-    ];
-    setChartData(mockChart);
+    fetchData();
+    setTimeout(() => {
+      const sortedData = unsortedData.sort((a, b) => {
+        return parseInt(a.time.minute) - parseInt(b.time.minute);
+      })
+      setChartData(sortedData);
+      const mockData = [
+        { id: 1, name: 'Nhiệt độ', value: `${sortedData[sortedData.length - 1].temp} °C` },
+        { id: 2, name: 'Độ ẩm', value: `${sortedData[sortedData.length - 1].humi} %` },
+        { id: 3, name: 'Ánh sáng', value: `${sortedData[sortedData.length - 1].light} lux` },
+      ];
+      setSensors(mockData);
+
+    }, 1500);
+
   }, []);
 
 
