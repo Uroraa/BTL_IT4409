@@ -12,7 +12,6 @@ app.use(express.json());
 //Add Schema
 const DataSchema = new mongoose.Schema({
     time: {
-        type: Date
     },
     temp: {
         type: Number
@@ -48,10 +47,24 @@ app.get("/api/data", async (req, res) => {
         res.status(400).json({ Error: error.message })
     }
 })
+//transfer Date to Object
+const handleTranferDate = (isoTimeString) => {
+    const dateObject = new Date(isoTimeString);
+    return {
+        hour: dateObject.getHours(),
+        minute: dateObject.getMinutes(),
+        day: dateObject.getDate(),
+        //+1 vi getMoth() bat dau tu 0
+        month: dateObject.getMonth() + 1,
+        year: dateObject.getFullYear()
+    }
+};
 
 app.post("/api/data", async (req, res) => {
     try {
-        const { time, temp, humi, light } = req.body;
+        const isoTimeString = req.body.time;
+        const time = handleTranferDate(isoTimeString);
+        const { temp, humi, light } = req.body;
         const newData = await Data.create({ time, temp, humi, light });
         res.status(200).json({
             message: "Gưi dữ liệu thành công",
@@ -65,13 +78,18 @@ app.post("/api/data", async (req, res) => {
 app.post("/api/manydata", async (req, res) => {
     try {
         const sampleData = req.body;
-        await Data.insertMany(sampleData);
+        const createData = sampleData.map(minidata => {
+            const time = handleTranferDate(minidata.time)
+            const { temp, humi, light } = minidata;
+            return Data.create({ time, temp, humi, light });
+        })
+        const newData = await Promise.all(createData);
         res.status(200).json({
             message: "Them du lieu thanh cong",
-            data: sampleData
+            data: newData
         })
     } catch (error) {
-        res.status(400).json({ Error: err.message })
+        res.status(400).json({ Error: error.message })
     }
 })
 
