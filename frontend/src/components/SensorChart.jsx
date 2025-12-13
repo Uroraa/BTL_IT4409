@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import '../App.css';
 
-function SensorChart({ data, visibleLines }) {
+function SensorChart({ data, visibleLines, onPointClick }) {
   return (
     <div className="sensor-chart">
       <h3>Biểu đồ Realtime</h3>
@@ -23,13 +23,46 @@ function SensorChart({ data, visibleLines }) {
           <Tooltip />
           <Legend />
           {visibleLines.temp && (
-            <Line type="monotone" dataKey="temp" name="Nhiệt độ" stroke="#ff000de0" strokeWidth={2} />
+            <Line 
+              type="monotone" 
+              dataKey="temp" 
+              name="Nhiệt độ" 
+              stroke="#ff000de0" 
+              strokeWidth={2} 
+              dot={{ r: 4 }}
+              activeDot={{
+                r: 6,
+                onClick: (_, index) => onPointClick(data[index])
+              }}
+            />
           )}
           {visibleLines.humi && (
-            <Line type="monotone" dataKey="humi" name="Độ ẩm" stroke="#0099ffd5" strokeWidth={2} />
+            <Line 
+              type="monotone" 
+              dataKey="humi" 
+              name="Độ ẩm" 
+              stroke="#0099ffd5" 
+              strokeWidth={2} 
+              dot={{ r: 4 }}
+              activeDot={{
+                r: 6,
+                onClick: (_, index) => onPointClick(data[index])
+              }}
+            />
           )}
           {visibleLines.light && (
-            <Line type="monotone" dataKey="light" name="Ánh sáng" stroke="#c9c919ff" strokeWidth={2} />
+            <Line 
+              type="monotone" 
+              dataKey="light" 
+              name="Ánh sáng" 
+              stroke="#c9c919ff" 
+              strokeWidth={2} 
+              dot={{ r: 4 }}
+              activeDot={{
+                r: 6,
+                onClick: (_, index) => onPointClick(data[index])
+              }}
+            />
           )}
         </LineChart>
       </ResponsiveContainer>
