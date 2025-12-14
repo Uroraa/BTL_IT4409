@@ -202,7 +202,7 @@ mqttClient.on("message", async (topic, message) => {
   }
 });
 
-// --- CÁC API HTTP (Giữ nguyên logic cũ của bạn) ---
+// --- CÁC API HTTP  ---
 
 app.get("/", (req, res) => {
   res.send("Server đang hoạt động!");
