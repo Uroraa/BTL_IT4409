@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "mqtt": "^5.14.1",
+    "socket.io": "^4.8.1"
+  }
+}
