@@ -105,8 +105,15 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 const mqtt = require("mqtt");
+const connectDB = require('./config/db.config');
+const db = require('./db');
+const mqttClient = require("./config/mqtt.config");
 
 const app = express();
+app.use(cors());
+app.use(express.json());
+connectDB();// Ket noi mongoDB
+
 
 // --- CẤU HÌNH SERVER & SOCKET.IO ---
 // Dùng http.createServer để chạy chung cả Express và Socket.io trên 1 port
@@ -118,30 +125,9 @@ const io = new Server(server, {
   },
 });
 
-app.use(cors());
-app.use(express.json());
+const Data = db.Data;
 
-// --- MONGODB SCHEMA ---
-const DataSchema = new mongoose.Schema({
-  time: {
-    hour: Number,
-    minute: Number,
-    day: Number,
-    month: Number,
-    year: Number,
-  },
-  temp: { type: Number },
-  humi: { type: Number }, // ESP gửi lên đang là 'hum', khi lưu vào mongodb đã map hum =>humi
-  light: { type: Number },
-});
-const Data = mongoose.model("data", DataSchema);
 
-mongoose
-  .connect(
-    `mongodb+srv://${process.env.USER_NAME}:${process.env.PASS}@db.prvoyfh.mongodb.net/it4409`
-  )
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB Error", err));
 
 // --- HÀM XỬ LÝ THỜI GIAN ---
 const handleTranferDate = (isoTimeString) => {
@@ -155,23 +141,6 @@ const handleTranferDate = (isoTimeString) => {
   };
 };
 
-// --- PHẦN MQTT (KẾT NỐI HIVEMQ & LƯU DB TỰ ĐỘNG) ---
-const MQTT_HOST = "dff8f7471d7745a6907092c74b9267e6.s1.eu.hivemq.cloud";
-const MQTT_PORT = 8883;
-const MQTT_USER = "Project220251"; // Check lại user/pass nếu cần
-const MQTT_PASS = "Project220251";
-const MQTT_TOPIC = "iot/sensor/data";
-
-const mqttClient = mqtt.connect(`mqtts://${MQTT_HOST}:${MQTT_PORT}`, {
-  username: MQTT_USER,
-  password: MQTT_PASS,
-  rejectUnauthorized: false, // Bỏ qua lỗi chứng chỉ SSL
-});
-
-mqttClient.on("connect", () => {
-  console.log("✅ Đã kết nối tới HiveMQ Cloud");
-  mqttClient.subscribe(MQTT_TOPIC);
-});
 
 mqttClient.on("message", async (topic, message) => {
   try {
@@ -270,5 +239,5 @@ io.on("connection", (socket) => {
 const port = process.env.PORT || 6969;
 // Dùng server.listen thay vì app.listen
 server.listen(port, () => {
-  console.log("🚀 Server is running on http://localhost:" + port);
+  console.log("Server is running on http://localhost:" + port);
 });
