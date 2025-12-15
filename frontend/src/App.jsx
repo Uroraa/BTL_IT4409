@@ -10,6 +10,7 @@ function App() {
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [timeRange, setTimeRange] = useState("ALL");
   const [alerts, setAlerts] = useState([]);
+  const [limit, setLimit] = useState(5);
 
   const [visibleLines, setVisibleLines] = useState({
     temp: true,
@@ -19,7 +20,7 @@ function App() {
   //fetchData
   let unsortedData = [];
   const fetchData = () => {
-    const url = `http://localhost:3001/api/data?timeRange=${timeRange}`;
+    const url = `http://localhost:3001/api/data?timeRange=${timeRange}&limit=${limit}`;
     fetch(url)
       .then(res => res.json())
       .then(data => { unsortedData = Array.from(data.data) })
