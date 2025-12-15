@@ -100,11 +100,9 @@
 require("dotenv").config();
 
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-const mqtt = require("mqtt");
 const connectDB = require('./config/db.config');
 const db = require('./db');
 const mqttClient = require("./config/mqtt.config");
@@ -180,7 +178,7 @@ app.get("/", (req, res) => {
 app.get("/api/data", async (req, res) => {
   try {
     // Lấy 50 dòng mới nhất để load trang cho nhanh, thay vì lấy all
-    const data = await Data.find({}).sort({ _id: -1 }).limit(50);
+    const data = await Data.find({}).sort({ _id: -1 }).limit(5);
     res.status(200).json({
       message: "Lấy dữ liệu thành công.",
       data: data,
