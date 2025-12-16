@@ -1,5 +1,6 @@
-const Data = require('./models/Data')
+import Data from './models/Data.js'
 
-module.exports = {
+const models = {
     Data
-};
+}
+export default models;

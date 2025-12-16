@@ -1,8 +1,9 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const DataSchema = new mongoose.Schema({
     time: {
         hour: Number,
         minute: Number,
+        second: Number,
         day: Number,
         month: Number,
         year: Number,
@@ -12,4 +13,6 @@ const DataSchema = new mongoose.Schema({
     light: { type: Number },
 });
 
-module.exports = mongoose.model('data', DataSchema);
+const Data = mongoose.model('data', DataSchema);
+
+export default Data;
