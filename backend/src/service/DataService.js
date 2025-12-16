@@ -21,7 +21,8 @@ const getDefault = (req, res) => {
 const getData = async (req, res) => {
     try {
         // Lấy 50 dòng mới nhất để load trang cho nhanh, thay vì lấy all
-        const data = await Data.find({}).sort({ _id: -1 }).limit(50);
+        const data = await Data.find({}).sort({ _id: -1 }).limit(10);
+        data.reverse();
         res.status(200).json({
             message: "Lấy dữ liệu thành công.",
             data: data,
@@ -64,7 +65,7 @@ const postManyData = async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 }
-//Ham xoa du lieu 
+//Ham xoa du lieu không nghịch
 const deleteData = async (req, res) => {
     const limit = parseInt(req.params.limit);
     if (limit <= 0) {
@@ -88,7 +89,6 @@ const deleteData = async (req, res) => {
             return 0;
         }
 
-        // BƯỚC 2: XÓA CÁC TÀI LIỆU DỰA TRÊN DANH SÁCH ID
         const result = await Data.deleteMany({
             _id: { $in: userIdsToDelete }
         });
