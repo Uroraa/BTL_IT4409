@@ -68,6 +68,7 @@ pip install -r requirements.txt
 ### 3. Chạy ứng dụng
 
 1. Khởi động backend và frontend
+
 #### Backend
 ```bash
 cd backend
@@ -81,7 +82,7 @@ cd frontend
 npm run dev
 ```
 Frontend sẽ chạy trên `http://localhost:5173` (mặc định Vite)
---
+
 #### Simulator (tùy chọn)
 ```bash
 cd simulator
