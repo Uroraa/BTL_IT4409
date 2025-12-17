@@ -177,7 +177,7 @@ function App() {
               onChange={e => setTimeRange(e.target.value)}
             >
               <option value="ALL">Tất cả</option>
-              <option value="LAST_2">2 phút gần nhất</option>
+              <option value="LAST_1">1 phút gần nhất</option>
               <option value="LAST_3">3 phút gần nhất</option>
             </select>
           </label>
