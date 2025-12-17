@@ -9,7 +9,6 @@ function App() {
   const [chartData, setChartData] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [timeRange, setTimeRange] = useState("ALL");
-  const [alerts, setAlerts] = useState([]);
   const [limit, setLimit] = useState(5);
 
   const [visibleLines, setVisibleLines] = useState({
@@ -17,6 +16,26 @@ function App() {
     humi: true,
     light: true
   });
+
+  const thresholds = {
+    temp: { threshold: 35, dir: 'high', unit: '°C' },
+    humi: { threshold: 40, dir: 'low', unit: '%' },
+    light: { threshold: 50, dir: 'low', unit: 'lux' }
+  };
+
+  const getStatus = (key, value) => {
+    const cfg = thresholds[key];
+    if (!cfg) return 'normal';
+    if (cfg.dir === 'high') {
+      if (value > cfg.threshold * 1.5) return 'critical';
+      if (value > cfg.threshold) return 'warning';
+      return 'normal';
+    } else {
+      if (value < cfg.threshold / 1.5) return 'critical';
+      if (value < cfg.threshold) return 'warning';
+      return 'normal';
+    }
+  };
   //fetchData
   let unsortedData = [];
   const fetchData = () => {
@@ -36,7 +55,7 @@ function App() {
 
   const filteredData = React.useMemo(() => {
     if (timeRange === "ALL") return chartData;
-    if (timeRange === "LAST_2") return chartData.slice(-2);
+    if (timeRange === "LAST_1") return chartData.slice(-1);
     if (timeRange === "LAST_3") return chartData.slice(-3);
     return chartData;
   }, [chartData, timeRange]);
@@ -61,40 +80,35 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
-  useEffect(() => {
-    if (chartData.length === 0) return;
-
-    const last = chartData[chartData.length - 1];
-    const newAlerts = [];
-
-    if (last.temp > 35) {
-      newAlerts.push("Nhiệt độ vượt ngưỡng an toàn!");
-    }
-
-    if (last.humi < 40) {
-      newAlerts.push("Độ ẩm quá thấp!");
-    }
-
-    if (last.light < 50) {
-      newAlerts.push("Ánh sáng quá tối!");
-    }
-
-    setAlerts(newAlerts);
-  }, [chartData]);
+  // Inline status-based coloring is used instead of top alerts.
 
 
   useEffect(() => {
 
     fetchData();
     setTimeout(() => {
+      // If no real data returned, generate mock data to test alerts
+      if (!unsortedData || unsortedData.length === 0) {
+        const tempValues = [30, 34, 36, 40, 20, 40];
+        const humiValues = [45, 38, 30, 20, 50, 10];
+        const lightValues = [100, 60, 40, 20, 10, 5];
+        unsortedData = tempValues.map((t, i) => ({
+          time: { minute: String(i), display: `00:${String(i).padStart(2, '0')}` },
+          temp: t,
+          humi: humiValues[i],
+          light: lightValues[i]
+        }));
+      }
+
       const sortedData = unsortedData.sort((a, b) => {
         return parseInt(a.time.minute) - parseInt(b.time.minute);
       })
       setChartData(sortedData);
+      const last = sortedData[sortedData.length - 1];
       const mockData = [
-        { id: 1, name: 'Nhiệt độ', value: `${sortedData[sortedData.length - 1].temp} °C` },
-        { id: 2, name: 'Độ ẩm', value: `${sortedData[sortedData.length - 1].humi} %` },
-        { id: 3, name: 'Ánh sáng', value: `${sortedData[sortedData.length - 1].light} lux` },
+        { id: 1, key: 'temp', name: 'Nhiệt độ', value: last.temp, display: `${last.temp} °C`, status: getStatus('temp', last.temp) },
+        { id: 2, key: 'humi', name: 'Độ ẩm', value: last.humi, display: `${last.humi} %`, status: getStatus('humi', last.humi) },
+        { id: 3, key: 'light', name: 'Ánh sáng', value: last.light, display: `${last.light} lux`, status: getStatus('light', last.light) },
       ];
       setSensors(mockData);
 
@@ -118,19 +132,6 @@ function App() {
   return (
     <div className="app-container">
       <h1>Sensor Dashboard</h1>
-
-      {alerts.length > 0 && (
-        <div className="alert-container">
-          {alerts.map((msg, index) => (
-            <div
-              key={index}
-              className="alert-box"
-            >
-              {msg}
-            </div>
-          ))}
-        </div>
-      )}
 
 
       <div className="sensor-container">

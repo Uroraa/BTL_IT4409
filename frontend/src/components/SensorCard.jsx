@@ -5,7 +5,9 @@ function SensorCard({ sensor }) {
   return (
     <div className="sensor-card">
       <h3>{sensor.name}</h3>
-      <p>{sensor.value}</p>
+      <p className={`sensor-value ${sensor.status || 'normal'}`}>
+        {sensor.display ?? sensor.value}
+      </p>
     </div>
   );
 }

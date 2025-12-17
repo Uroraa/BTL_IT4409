@@ -129,3 +129,20 @@ h1 {
   background: rgba(255,255,255,0.05);
   border-radius: 8px;
 }
+
+/* Sensor value status styles */
+.sensor-value {
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.sensor-value.warning {
+  background: #ffd426;
+  color: #2b2b2b;
+}
+
+.sensor-value.critical {
+  background: #ff4d4f;
+  color: #ffffff;
+}
