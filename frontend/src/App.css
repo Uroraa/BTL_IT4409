@@ -9,7 +9,6 @@ body {
   justify-content: center;
 }
 
-
 h1 {
   text-align: center;
   padding: 20px 0;
@@ -23,96 +22,117 @@ h1 {
   padding: 24px 20px;
 }
 
-
 /* ===== Alert ===== */
 .alert-container {
+  max-width: 720px;
   margin: 20px auto;
-  max-width: 500px;
 }
 
 .alert-box {
   background: #ff4d4f;
   color: white;
   padding: 12px 16px;
-  border-radius: 6px;
-  margin-bottom: 10px;
+  border-radius: 8px;
   font-size: 14px;
 }
 
 /* ===== Sensor cards ===== */
 .sensor-container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   gap: 16px;
   padding: 20px 0;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .sensor-card {
+  flex: 1 1 0;
   background-color: #2b2b3d;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  padding: 16px;
-  min-width: 150px;
+  padding: 18px 12px;
   text-align: center;
 }
 
 .sensor-card h3 {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
+  font-size: 0.95em;
   color: #00ffff;
+  opacity: 0.85;
 }
 
 .sensor-card p {
-  font-size: 1.2em;
+  font-size: 1.6em;
+  font-weight: 700;
   margin: 0;
 }
 
-/* ===== Control boxes (quan trọng nhất) ===== */
+/* ===== Control box ===== */
 .control-box {
-  width: 500px;
-  margin: 0 auto 14px auto;
-  padding: 12px 16px;
+  max-width: 720px;
+  margin: 0 auto 20px;
+  padding: 16px 18px;
   background: rgba(255,255,255,0.04);
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.36);
 }
 
-/* Checkbox row */
+/* ===== Controls layout ===== */
+.controls-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Checkbox group */
 .checkbox-group {
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 18px;
+  white-space: nowrap;
 }
 
 .checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
+  font-size: 0.95em;
 }
 
-/* Filter + export row */
+/* Filter + export */
 .filter-export {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 .filter-export select {
-  margin-left: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
 }
 
 .filter-export button {
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  background: linear-gradient(135deg, #00bfff, #00e0ff);
+  color: #1f2235;
+  font-weight: 600;
 }
 
 /* ===== Chart ===== */
 .sensor-chart {
-  width: 90%;
-  height: 300px;
+  max-width: 720px;
+  height: 320px;
   background: #2c2f42;
   margin: 30px auto;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
 }
 
 .sensor-chart h3 {
@@ -123,14 +143,14 @@ h1 {
 
 /* ===== Detail panel ===== */
 .detail-panel {
-  max-width: 500px;
+  max-width: 720px;
   margin: 20px auto;
   padding: 16px;
   background: rgba(255,255,255,0.05);
   border-radius: 8px;
 }
 
-/* Sensor value status styles */
+/* ===== Sensor value status ===== */
 .sensor-value {
   padding: 6px 10px;
   border-radius: 6px;
@@ -145,4 +165,37 @@ h1 {
 .sensor-value.critical {
   background: #ff4d4f;
   color: #ffffff;
+}
+
+/* ===== Hover (giữ nguyên logic cũ) ===== */
+.sensor-card,
+.control-box,
+.sensor-chart,
+.detail-panel,
+.alert-box {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.sensor-card:hover {
+  transform: translateY(-8px);
+}
+
+.control-box:hover {
+  transform: translateY(-4px);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 820px) {
+  .sensor-container {
+    flex-direction: column;
+  }
+
+  .controls-flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-export {
+    justify-content: space-between;
+  }
 }

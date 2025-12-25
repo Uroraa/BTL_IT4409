@@ -140,49 +140,49 @@ function App() {
         ))}
       </div>
 
-      <div className="control-box">
-        <div className="checkbox-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={visibleLines.temp}
-              onChange={() => handleToggle("temp")}
-            /> Nhiệt độ
-          </label>
+      <div className="control-box controls-horizontal">
+        <div className="controls-flex">
+          <div className="checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={visibleLines.temp}
+                onChange={() => handleToggle("temp")}
+              /> Nhiệt độ
+            </label>
 
-          <label>
-            <input
-              type="checkbox"
-              checked={visibleLines.humi}
-              onChange={() => handleToggle("humi")}
-            /> Độ ẩm
-          </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={visibleLines.humi}
+                onChange={() => handleToggle("humi")}
+              /> Độ ẩm
+            </label>
 
-          <label>
-            <input
-              type="checkbox"
-              checked={visibleLines.light}
-              onChange={() => handleToggle("light")}
-            /> Ánh sáng
-          </label>
-        </div>
-      </div>
+            <label>
+              <input
+                type="checkbox"
+                checked={visibleLines.light}
+                onChange={() => handleToggle("light")}
+              /> Ánh sáng
+            </label>
+          </div>
 
-      <div className="control-box">
-        <div className="filter-export">
-          <label>
-            Lọc thời gian:
-            <select
-              value={timeRange}
-              onChange={e => setTimeRange(e.target.value)}
-            >
-              <option value="ALL">Tất cả</option>
-              <option value="LAST_1">1 phút gần nhất</option>
-              <option value="LAST_3">3 phút gần nhất</option>
-            </select>
-          </label>
+          <div className="filter-export">
+            <label>
+              Lọc thời gian: 
+              <select
+                value={timeRange}
+                onChange={e => setTimeRange(e.target.value)}
+              >
+                <option value="ALL">Tất cả</option>
+                <option value="LAST_1">1 phút gần nhất</option>
+                <option value="LAST_3">3 phút gần nhất</option>
+              </select>
+            </label>
 
-          <button onClick={exportCSV}>Export CSV</button>
+            <button onClick={exportCSV}>Export CSV</button>
+          </div>
         </div>
       </div>
 
