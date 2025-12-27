@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SensorCard from '../components/SensorCard';
 import SensorChart from '../components/SensorChart';
-import { generateSensorMock } from '../mocks/sensor.mock';
-import { getSensorData } from '../api';
+import { fetchDashboardData } from '../api';
 import '../App.css';
 
 function Dashboard() {
@@ -10,7 +9,7 @@ function Dashboard() {
   const [chartData, setChartData] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
   const [timeRange, setTimeRange] = useState("ALL");
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(10);
 
   const [visibleLines, setVisibleLines] = useState({
     temp: true,
@@ -37,14 +36,16 @@ function Dashboard() {
       return 'normal';
     }
   };
-  //fetchData
+  //fetchData (uses centralized api with mock fallback)
   let unsortedData = [];
-  const fetchData = () => {
-    const url = `http://localhost:3001/api/data?timeRange=${timeRange}&limit=${limit}`;
-    fetch(url)
-      .then(res => res.json())
-      .then(data => { unsortedData = Array.from(data.data) })
-      .catch(err => console.error(err))
+  const fetchData = async () => {
+    try {
+      const data = await fetchDashboardData({ limit, timeRange });
+      unsortedData = Array.from(data || []);
+    } catch (err) {
+      console.error('fetchData error', err);
+      unsortedData = [];
+    }
   }
   // Toggle sensor  
   const handleToggle = (key) => {
@@ -85,17 +86,24 @@ function Dashboard() {
 
 
   useEffect(() => {
+    let cancelled = false;
 
-    fetchData();
-    setTimeout(() => {
-      // If no real data returned, generate mock data to test alerts
-      if (!unsortedData || unsortedData.length === 0) {
-        unsortedData = generateSensorMock(10);
+    (async () => {
+      await fetchData();
+      if (cancelled) return;
+
+      const sortedData = (unsortedData || []).slice().sort((a, b) => {
+        const ta = (a && a.time && a.time.ts) || 0;
+        const tb = (b && b.time && b.time.ts) || 0;
+        return ta - tb;
+      });
+
+      if (!sortedData || sortedData.length === 0) {
+        setChartData([]);
+        setSensors([]);
+        return;
       }
 
-      const sortedData = unsortedData.sort((a, b) => {
-        return parseInt(a.time.minute) - parseInt(b.time.minute);
-      })
       setChartData(sortedData);
       const last = sortedData[sortedData.length - 1];
       const mockData = [
@@ -104,9 +112,9 @@ function Dashboard() {
         { id: 3, key: 'light', name: 'Ánh sáng', value: last.light, display: `${last.light} lux`, status: getStatus('light', last.light) },
       ];
       setSensors(mockData);
+    })();
 
-    }, 1500);
-
+    return () => { cancelled = true; };
   }, []);
 
 

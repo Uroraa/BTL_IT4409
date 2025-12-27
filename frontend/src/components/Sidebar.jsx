@@ -10,7 +10,7 @@ export default function Sidebar() {
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       {/* Header */}
       <div className="sidebar-header">
-        {!collapsed && <div className="brand">Dashboard</div>}
+        {!collapsed && <div className="brand">Main menu</div>}
         <button
           className="toggle-btn"
           onClick={() => setCollapsed(prev => !prev)}
@@ -28,6 +28,11 @@ export default function Sidebar() {
           className={({ isActive }) =>
             `nav-item ${isActive ? 'active' : ''}`
           }
+          tabIndex={collapsed ? -1 : 0}
+          aria-disabled={collapsed}
+          onClick={(e) => {
+            if (collapsed) e.preventDefault();
+          }}
         >
           <span className="nav-text">Trang chính</span>
         </NavLink>
@@ -37,6 +42,11 @@ export default function Sidebar() {
           className={({ isActive }) =>
             `nav-item ${isActive ? 'active' : ''}`
           }
+          tabIndex={collapsed ? -1 : 0}
+          aria-disabled={collapsed}
+          onClick={(e) => {
+            if (collapsed) e.preventDefault();
+          }}
         >
           <span className="nav-text">Lịch sử</span>
         </NavLink>
@@ -45,9 +55,12 @@ export default function Sidebar() {
       {/* Footer */}
       {!collapsed && (
         <div className="sidebar-footer">
-          <small>© Your Project</small>
+          <small>© Vigilant IoT</small>
         </div>
       )}
+
+      {/* visual guard when collapsed: covers the thin bar area so colors blend */}
+      {collapsed && <div className="collapse-guard" aria-hidden="true" />}
     </aside>
   );
 }

@@ -223,7 +223,7 @@ h1 {
 }
 
 .sidebar.collapsed {
-  width: 64px;
+  width: 70px;
 }
 
 .sidebar-header {
@@ -243,13 +243,15 @@ h1 {
   background: none;
   border: none;
   color: #38bdf8;
-  font-size: 18px;
+  font-size: 20px;         
+  font-weight: 900;
   cursor: pointer;
+  padding: 10px;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 8px;
+  padding: 10px;
 }
 
 .nav-item {
@@ -275,6 +277,22 @@ h1 {
 .sidebar.collapsed .nav-text {
   opacity: 0;
   pointer-events: none;
+}
+
+/* When sidebar is collapsed, prevent clicks and focus on nav items */
+.sidebar.collapsed .sidebar-nav {
+  pointer-events: none;
+}
+
+.sidebar.collapsed .nav-item {
+  background-color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sidebar.collapsed .nav-item:focus,
+.sidebar.collapsed .nav-item:focus-within {
+  outline: none;
 }
 
 .sidebar-footer {

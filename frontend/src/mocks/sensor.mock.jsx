@@ -12,15 +12,24 @@ function rand(min, max) {
 
 // ===== MOCK 1: realtime/dashboard data (GIỮ NGUYÊN, chỉ clean lại) =====
 export function generateSensorMock(count = 10) {
-  return Array.from({ length: count }).map((_, i) => ({
-    time: {
-      minute: String(i),
-      display: `00:${String(i).padStart(2, '0')}`
-    },
-    temp: rand(10, 100),
-    humi: rand(10, 100),
-    light: rand(10, 100)
-  }));
+  const now = Date.now();
+  const spacing = 5000; // 5 seconds
+  return Array.from({ length: count }).map((_, i) => {
+    const t = new Date(now - (count - 1 - i) * spacing);
+    const hh = String(t.getHours()).padStart(2, '0');
+    const mm = String(t.getMinutes()).padStart(2, '0');
+    const ss = String(t.getSeconds()).padStart(2, '0');
+    return {
+      time: {
+        minute: String(Math.floor((now - (count - 1 - i) * spacing) / 60000)),
+        display: `${hh}:${mm}:${ss}`,
+        ts: t.getTime()
+      },
+      temp: rand(10, 100),
+      humi: rand(10, 100),
+      light: rand(10, 100)
+    };
+  });
 }
 
 // ===== MOCK 2: history per sensor =====
@@ -28,13 +37,15 @@ export function generateSensorHistory(sensorKey, count = 10) {
   const now = Date.now();
   const arr = [];
 
+  const spacing = 5000; // 5 seconds
   for (let i = 0; i < count; i++) {
-    const t = new Date(now - (count - 1 - i) * 60 * 1000); // mỗi điểm cách 1 phút
+    const t = new Date(now - (count - 1 - i) * spacing);
     const hh = String(t.getHours()).padStart(2, '0');
     const mm = String(t.getMinutes()).padStart(2, '0');
+    const ss = String(t.getSeconds()).padStart(2, '0');
 
     arr.push({
-      time: `${hh}:${mm}`,
+      time: `${hh}:${mm}:${ss}`,
       value: rand(10, 100)
     });
   }

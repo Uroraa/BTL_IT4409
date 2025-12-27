@@ -18,9 +18,17 @@ function SensorChart({ data, visibleLines, onPointClick }) {
       <ResponsiveContainer width="100%" height="80%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-          <XAxis dataKey="time.minute" stroke="#e7dcdcff" />
+          <XAxis
+            dataKey="time.display"
+            stroke="#e7dcdcff"
+            tickFormatter={(value, index) => (typeof index === 'number' ? String(index + 1) : value)}
+          />
           <YAxis stroke="#aaa" />
-          <Tooltip />
+          <Tooltip
+            contentStyle={{ backgroundColor: '#0f1724', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, color: '#fff' }}
+            labelStyle={{ color: '#9ca3af', fontWeight: 600 }}
+            labelFormatter={(label) => label}
+          />
           <Legend />
           {visibleLines.temp && (
             <Line
