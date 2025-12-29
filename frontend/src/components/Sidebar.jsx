@@ -3,11 +3,15 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import '../App.css';
 
-export default function Sidebar() {
+export default function Sidebar({ mobileOpen = false, onMobileClose }) {
   const [collapsed, setCollapsed] = useState(false);
 
+  const handleNavClick = () => {
+    if (onMobileClose) onMobileClose();
+  };
+
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${mobileOpen ? 'mobile-open' : ''} ${!mobileOpen && collapsed ? 'collapsed' : ''}`}>
       {/* Header */}
       <div className="sidebar-header">
         {!collapsed && <div className="brand">Main menu</div>}
@@ -32,6 +36,7 @@ export default function Sidebar() {
           aria-disabled={collapsed}
           onClick={(e) => {
             if (collapsed) e.preventDefault();
+            handleNavClick();
           }}
         >
           <span className="nav-text">Trang chính</span>
@@ -46,6 +51,7 @@ export default function Sidebar() {
           aria-disabled={collapsed}
           onClick={(e) => {
             if (collapsed) e.preventDefault();
+            handleNavClick();
           }}
         >
           <span className="nav-text">Lịch sử</span>

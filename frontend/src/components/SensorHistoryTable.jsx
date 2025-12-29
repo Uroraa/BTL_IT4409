@@ -78,9 +78,9 @@ export default function SensorHistoryTable() {
               const show = computed && computed !== 'normal';
               return (
                 <tr key={i}>
-                  <td>{r.time}</td>
-                  <td>{r.value}</td>
-                  <td className={show ? `level level-${computed}` : ''}>{show ? computed : ''}</td>
+                  <td data-label="Thời gian">{r.time}</td>
+                  <td data-label="Giá trị">{r.value}</td>
+                  <td data-label="Mức cảnh báo" className={show ? `level level-${computed}` : ''}>{show ? computed : ''}</td>
                 </tr>
               );
             })}

@@ -65,14 +65,14 @@ export default function AlertHistoryTable() {
           </thead>
           <tbody>
             {visible.length === 0 && (
-              <tr><td colSpan="4">Không có alert</td></tr>
+              <tr><td colSpan="4" className="empty-cell">Không có alert</td></tr>
             )}
             {visible.map((a, i) => (
               <tr key={i}>
-                <td>{a.time}</td>
-                <td>{a.sensor}</td>
-                <td>{a.value}</td>
-                <td className={`level level-${a.level}`}>{a.level}</td>
+                <td data-label="Thời gian">{a.time}</td>
+                <td data-label="Sensor">{a.sensor}</td>
+                <td data-label="Giá trị">{a.value}</td>
+                <td data-label="Mức cảnh báo" className={`level level-${a.level}`}>{a.level}</td>
               </tr>
             ))}
           </tbody>
