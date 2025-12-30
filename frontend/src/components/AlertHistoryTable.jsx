@@ -33,7 +33,7 @@ export default function AlertHistoryTable() {
   return (
     <div>
       <div className="filter-export" style={{ justifyContent: 'flex-end', marginBottom: 10 }}>
-        <label style={{ color: '#cfeeff', fontSize: 14 }}>
+        <label className="filter-label">
           Hiện:
           <select
             value={pageSize}
@@ -48,7 +48,7 @@ export default function AlertHistoryTable() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 12 }}>
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
-          <span style={{ color: '#cfeeff' }}>{page} / {totalPages}</span>
+          <span className="page-indicator">{page} / {totalPages}</span>
           <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</button>
         </div>
       </div>

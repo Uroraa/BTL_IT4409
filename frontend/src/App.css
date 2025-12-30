@@ -34,28 +34,29 @@ body,
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg-1: #f2f4f8;
-  --bg-2: #e6ebf2;
-  --text-1: #1f2430;
-  --text-2: #435066;
-  --accent: #0077b6;
-  --accent-2: #1ea4d8;
+  --bg-1: #f6f8fb;
+  --bg-2: #e9eef5;
+  --text-1: #0f172a;
+  --text-2: #334155;
+  --accent: #0b6bbf;
+  --accent-2: #1992d4;
   --card: #ffffff;
   --panel: #f7f9fc;
-  --panel-soft: rgba(0,0,0,0.04);
-  --panel-soft-2: rgba(0,0,0,0.03);
-  --table-bg: rgba(0,0,0,0.02);
-  --border: rgba(0,0,0,0.08);
-  --sidebar-bg-1: #f1f5f9;
+  --panel-soft: rgba(15, 23, 42, 0.06);
+  --panel-soft-2: rgba(15, 23, 42, 0.04);
+  --table-bg: rgba(15, 23, 42, 0.03);
+  --border: rgba(15, 23, 42, 0.12);
+  --sidebar-bg-1: #eef2f7;
   --sidebar-bg-2: #e2e8f0;
-  --nav-text: #334155;
-  --nav-active: #0ea5e9;
-  --nav-hover: rgba(14, 165, 233, 0.15);
-  --nav-active-bg: rgba(14, 165, 233, 0.25);
-  --shadow: rgba(0,0,0,0.18);
-  --danger: #e53e3e;
-  --warning: #f6c343;
-  --table-shadow: rgba(0,0,0,0.12);
+  --nav-text: #0f172a;
+  --nav-active: #0b6bbf;
+  --nav-hover: rgba(11, 107, 191, 0.12);
+  --nav-active-bg: rgba(11, 107, 191, 0.2);
+  --shadow: rgba(15, 23, 42, 0.18);
+  --danger: #d32f2f;
+  --warning: #e0a800;
+  --table-shadow: rgba(15, 23, 42, 0.14);
+  --button-text: #0f172a;
 }
 
 body {
@@ -175,6 +176,9 @@ h1 {
 .filter-export select {
   padding: 6px 8px;
   border-radius: 6px;
+  background: var(--card);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 
 .filter-export button {
@@ -183,7 +187,7 @@ h1 {
   border: none;
   cursor: pointer;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--bg-1);
+  color: var(--button-text, var(--bg-1));
   font-weight: 600;
 }
 
@@ -402,7 +406,7 @@ h1 {
   border: 1px solid transparent;
   cursor: pointer;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: var(--bg-1);
+  color: var(--button-text, var(--bg-1));
   font-weight: 600;
 }
 
@@ -424,7 +428,7 @@ h1 {
   background: var(--card);
   border-radius: 8px;
   border: none;
-  color: var(--text-2);
+  color: var(--text-1);
   cursor: pointer;
 }
 
@@ -469,15 +473,15 @@ h1 {
 }
 
 .level-warning {
-  color: #8a5a00;
-  background: rgba(255,210,38,0.12);
+  color: #5a3d00;
+  background: rgba(224,168,0,0.18);
   padding: 4px 8px;
   border-radius: 6px;
 }
 
 .level-critical {
-  color: #ffefef;
-  background: rgba(255,80,80,0.12);
+  color: #ffffff;
+  background: rgba(211,47,47,0.85);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -595,3 +599,11 @@ h1 {
   }
 }
 
+.filter-label {
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.page-indicator {
+  color: var(--text-2);
+}

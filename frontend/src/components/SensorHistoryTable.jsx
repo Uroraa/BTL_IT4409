@@ -46,7 +46,7 @@ export default function SensorHistoryTable() {
         </div>
 
         <div className="filter-export" style={{ gap: 10 }}>
-          <label style={{ color: '#cfeeff' }}>
+          <label className="filter-label">
             Hiện:
             <select value={pageSize} onChange={e => setPageSize(Number(e.target.value))} style={{ marginLeft: 8 }}>
               <option value={5}>5</option>
@@ -57,7 +57,7 @@ export default function SensorHistoryTable() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
-            <span style={{ color: '#cfeeff' }}>{page} / {totalPages}</span>
+            <span className="page-indicator">{page} / {totalPages}</span>
             <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next</button>
           </div>
         </div>
