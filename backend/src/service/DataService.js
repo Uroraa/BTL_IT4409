@@ -100,6 +100,76 @@ const deleteData = async (req, res) => {
   }
 };
 
+const formatTimeDisplay = (timeObj) => {
+  if (!timeObj) return '';
+  const hh = String(timeObj.hour ?? 0).padStart(2, '0');
+  const mm = String(timeObj.minute ?? 0).padStart(2, '0');
+  const dd = timeObj.day ?? '';
+  const mo = timeObj.month ?? '';
+  return `${hh}:${mm} ${dd}/${mo}`;
+};
+
+const getHistory = async (req, res) => {
+  try {
+    const sensor = req.query.sensor || 'temp';
+    const count = parseInt(req.query.count) || 10;
+    const data = await Data.find({}).sort({ _id: -1 }).limit(count);
+    // newest first from DB; reverse to chronological
+    data.reverse();
+    const arr = data.map(pt => ({ time: formatTimeDisplay(pt.time), value: pt[sensor] }));
+    return res.status(200).json(arr);
+  } catch (error) {
+    console.error('Error in getHistory', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const getAlerts = async (req, res) => {
+  try {
+    const count = parseInt(req.query.count) || 10;
+    // fetch a reasonably large recent window to detect alerts
+    const fetchLimit = Math.max(240, count * 10);
+    const data = await Data.find({}).sort({ _id: -1 }).limit(fetchLimit);
+
+    const thresholds = {
+      temp: { threshold: 35, dir: 'high' },
+      humi: { threshold: 40, dir: 'low' },
+      light: { threshold: 50, dir: 'low' }
+    };
+
+    function levelFor(sensorKey, value) {
+      const cfg = thresholds[sensorKey];
+      if (!cfg || value == null) return 'normal';
+      if (cfg.dir === 'high') {
+        if (value > cfg.threshold * 1.5) return 'critical';
+        if (value > cfg.threshold) return 'warning';
+        return 'normal';
+      } else {
+        if (value < cfg.threshold / 1.5) return 'critical';
+        if (value < cfg.threshold) return 'warning';
+        return 'normal';
+      }
+    }
+
+    const alerts = [];
+    data.forEach(pt => {
+      ['temp', 'humi', 'light'].forEach(sensorKey => {
+        const lvl = levelFor(sensorKey, pt[sensorKey]);
+        if (lvl !== 'normal') {
+          alerts.push({ time: formatTimeDisplay(pt.time), sensorKey, sensor: sensorKey, value: pt[sensorKey], level: lvl });
+        }
+      });
+    });
+
+    // newest first and limit
+    const result = alerts.reverse().slice(0, count);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Error in getAlerts', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   handleTranferDate,
   getDefault,
@@ -107,4 +177,6 @@ export {
   postData,
   postManyData,
   deleteData,
+  getHistory,
+  getAlerts,
 };
