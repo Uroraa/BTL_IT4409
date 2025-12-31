@@ -607,3 +607,11 @@ h1 {
 .page-indicator {
   color: var(--text-2);
 }
+
+/* Center iframe */
+.iframe-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}

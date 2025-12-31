@@ -171,7 +171,7 @@ function Dashboard() {
 
           <div className="filter-export">
             <label>
-              Lọc thời gian: 
+              Lọc thời gian:
               <select
                 value={timeRange}
                 onChange={e => setTimeRange(e.target.value)}
@@ -187,11 +187,14 @@ function Dashboard() {
         </div>
       </div>
 
-      <SensorChart
+      {/* <SensorChart
         data={filteredData}
         visibleLines={visibleLines}
         onPointClick={setSelectedPoint}
-      />
+      /> */}
+      <div className="iframe-center">
+        <iframe src="http://localhost:3001/d-solo/adm9ztp/new-dashboard?orgId=1&timezone=browser&refresh=5s&theme=dark&panelId=panel-1&__feature.dashboardSceneSolo=true" width="600" height="400" frameborder="0"></iframe>
+      </div>
 
       {selectedPoint && (
         <div className="detail-panel">

@@ -1,5 +1,7 @@
 import models from "../db/index.js";
 import io from "../config/io.config.js";
+import writePoint from "./influxService.js";
+import influxClient from "../config/influxdb.js";
 
 const Data = models.Data;
 
@@ -53,10 +55,14 @@ const postData = async (req, res) => {
 };
 const postManyData = async (req, res) => {
   try {
-    const isoTimeString = req.body.time || new Date().toISOString();
-    const time = handleTranferDate(isoTimeString);
-    const { temp, humi, light } = req.body;
-    const newData = await Data.create({ time, temp, humi, light });
+    const dataArray = req.body;
+    let newData = [];
+    dataArray.forEach(async (item) => {
+      const isoTimeString = item.time || new Date().toISOString();
+      const time = handleTranferDate(isoTimeString);
+      const { temp, humi, light } = item;
+      newData.push(await Data.create({ time, temp, humi, light }));
+    });
     res.status(200).json({
       message: "Gửi dữ liệu thành công",
       data: newData,
@@ -65,40 +71,28 @@ const postManyData = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-//Ham xoa du lieu không nghịch
-const deleteData = async (req, res) => {
-  const limit = parseInt(req.params.limit);
-  if (limit <= 0) {
-    console.log("Số lượng giới hạn phải lớn hơn 0.");
-    return 0;
-  }
 
+const generateSampleData = () => {
+  const temp = (Math.random() * 30 + 10);
+  const humi = (Math.random() * 50 + 30);
+  const light = (Math.random() * 200 + 100);
+  return { temp, humi, light };
+}
+
+const postSampleData = async () => {
   try {
-    // BƯỚC 1: TÌM KIẾM CÁC ID CỦA NGƯỜI DÙNG MỚI NHẤT
-    const latestUsers = await Data.find({})
-      .sort({ _id: -1 }) // Sắp xếp giảm dần theo ID (mới nhất lên đầu)
-      .limit(limit) // Giới hạn số lượng N
-      .select("_id") // Chỉ lấy trường _id để tiết kiệm tài nguyên
-      .lean(); // Chuyển sang đối tượng JavaScript thuần (tùy chọn, tối ưu hiệu suất)
-
-    // Tạo một mảng chứa các ID cần xóa
-    const userIdsToDelete = latestUsers.map((user) => user._id);
-
-    if (userIdsToDelete.length === 0) {
-      console.log("Không tìm thấy người dùng nào để xóa.");
-      return 0;
+    while (true) {
+      const sampleData = generateSampleData();
+      await Data.create(sampleData);
+      // io.emit("new_data", sampleData);
+      await writePoint(influxClient, sampleData);
+      console.log("Sample data posted:", sampleData);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Dừng 5 giây
     }
-
-    const result = await Data.deleteMany({
-      _id: { $in: userIdsToDelete },
-    });
-
-    // Trả về số lượng đã xóa
-    return res.status(200).json("Xoa thanh cong");
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error("Error in postSampleData:", err);
   }
-};
+}
 
 const formatTimeDisplay = (timeObj) => {
   if (!timeObj) return '';
@@ -175,8 +169,7 @@ export {
   getDefault,
   getData,
   postData,
-  postManyData,
-  deleteData,
   getHistory,
   getAlerts,
+  postSampleData
 };
