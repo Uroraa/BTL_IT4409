@@ -3,8 +3,11 @@ import mqtt from "mqtt";
 import io from "./io.config.js";
 import { handleTranferDate } from "../service/DataService.js";
 import models from "../db/index.js";
+import influxClient from "./influxdb.js";
+import writePoint from "../service/influxService.js";
 
-const Data = models.Data;
+
+const [Data, point] = [models.Data, models.point]
 
 const mqttClient = mqtt.connect(
   `mqtts://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`,
@@ -50,20 +53,28 @@ mqttClient.on("message", async (topic, message) => {
     const now = new Date().toISOString();
     const timeObj = handleTranferDate(now);
 
-    // Lưu vào DB
+    // Lưu vào mongoDB
     const newData = await Data.create({
       time: timeObj,
       temp: jsonData.temp,
-      humi: jsonData.hum,
+      humi: jsonData.humi,
       light: jsonData.light,
     });
+    //Luu vao influxDB 
+    try {
+      writePoint(influxClient, jsonData);
+      console.log(' Đã lưu InfluxDB:', jsonData);
+
+    } catch (error) {
+      console.error(' Lỗi lưu InfluxDB:', error.message);
+    }
 
     // Gửi dữ liệu tới Frontend
     io.emit("new_data", newData);
 
-    console.log("💾 Đã lưu DB & Emit Socket:", jsonData);
+    console.log(" Đã lưu DB & Emit Socket:", jsonData);
   } catch (err) {
-    console.error("❌ Lỗi xử lý tin nhắn MQTT:", err.message);
+    console.error(" Lỗi xử lý tin nhắn MQTT:", err.message);
   }
 });
 
