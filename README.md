@@ -114,12 +114,12 @@ python simulator.py
 ```
 
 #### Grafana Dashboard
-Grafana sẽ chạy trên `http://localhost:3000` (nếu sử dụng Docker)
+Grafana sẽ chạy trên `http://localhost:3000` (nếu sử dụng Docker) hoặc `http://localhost:3001` ( nếu truy cập từ trình duyệt )
 
 ### 5. Sử dụng
 
 1. Mở browser truy cập `http://localhost:5173` để xem dashboard chính
-2. Truy cập `http://localhost:3000` để xem Grafana dashboard (tài khoản mặc định: admin/admin)
+2. Truy cập `http://localhost:3001` trên trình duyệt để xem Grafana dashboard (tài khoản: admin. Mật khẩu: 1234)
 3. Dữ liệu sẽ hiển thị real-time khi sensor gửi qua MQTT
 4. Sử dụng Postman hoặc curl để test API endpoints
 
