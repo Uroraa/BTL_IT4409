@@ -16,20 +16,20 @@ body,
   --accent-2: #00e0ff;
   --card: #2b2b3d;
   --panel: #2c2f42;
-  --panel-soft: rgba(255,255,255,0.04);
-  --panel-soft-2: rgba(255,255,255,0.05);
-  --table-bg: rgba(255,255,255,0.02);
-  --border: rgba(255,255,255,0.04);
+  --panel-soft: rgba(255, 255, 255, 0.04);
+  --panel-soft-2: rgba(255, 255, 255, 0.05);
+  --table-bg: rgba(255, 255, 255, 0.02);
+  --border: rgba(255, 255, 255, 0.04);
   --sidebar-bg-1: #0f172a;
   --sidebar-bg-2: #020617;
   --nav-text: #cbd5f5;
   --nav-active: #38bdf8;
   --nav-hover: rgba(56, 189, 248, 0.15);
   --nav-active-bg: rgba(56, 189, 248, 0.25);
-  --shadow: rgba(0,0,0,0.4);
+  --shadow: rgba(0, 0, 0, 0.4);
   --danger: #ff4d4f;
   --warning: #ffd426;
-  --table-shadow: rgba(0,0,0,0.25);
+  --table-shadow: rgba(0, 0, 0, 0.25);
 }
 
 [data-theme="light"] {
@@ -311,7 +311,7 @@ h1 {
   background: none;
   border: none;
   color: var(--nav-active);
-  font-size: 20px;         
+  font-size: 20px;
   font-weight: 900;
   cursor: pointer;
   padding: 10px;
@@ -410,7 +410,7 @@ h1 {
   font-weight: 600;
 }
 
-.sidebar.collapsed ~ .main-content {
+.sidebar.collapsed~.main-content {
   margin-left: 64px;
 }
 
@@ -455,7 +455,7 @@ h1 {
   right: 0;
   width: 22px;
   height: 100%;
-  background: linear-gradient(90deg, rgba(0,0,0,0), var(--table-shadow));
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0), var(--table-shadow));
   pointer-events: none;
 }
 
@@ -474,14 +474,14 @@ h1 {
 
 .level-warning {
   color: #5a3d00;
-  background: rgba(224,168,0,0.18);
+  background: rgba(224, 168, 0, 0.18);
   padding: 4px 8px;
   border-radius: 6px;
 }
 
 .level-critical {
   color: #ffffff;
-  background: rgba(211,47,47,0.85);
+  background: rgba(211, 47, 47, 0.85);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -493,20 +493,25 @@ h1 {
     transform: translateX(-100%);
     transition: transform 0.25s ease;
   }
+
   .toggle-btn {
     display: none;
   }
+
   .main-content {
     margin-left: 0;
     padding: 18px;
   }
+
   .app-container {
     max-width: 100%;
     padding: 18px 14px;
   }
+
   .sidebar.mobile-open {
     transform: translateX(0);
   }
+
   .menu-toggle {
     display: inline-flex;
     align-items: center;
@@ -517,7 +522,7 @@ h1 {
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   z-index: 90;
 }
 
@@ -608,10 +613,8 @@ h1 {
   color: var(--text-2);
 }
 
-/* Center iframe */
-.iframe-center {
+.graph-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  width: 100%;
+  margin-top: 20px;
 }

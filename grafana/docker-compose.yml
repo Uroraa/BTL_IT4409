@@ -12,8 +12,10 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_SECURITY_ALLOW_EMBEDDING=true # Thêm dòng này để cho phép nhúng
       - GF_AUTH_ANONYMOUS_ENABLED=true # (Tùy chọn) Cho phép người khác xem biểu đồ mà không cần đăng nhập
-      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_PANELS_DISABLE_MENU=true
+      - GF_PUBLIC_DASHBOARDS_ENABLED=true
 
 volumes:
   grafana-data:

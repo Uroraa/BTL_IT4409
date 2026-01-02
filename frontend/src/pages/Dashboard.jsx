@@ -192,8 +192,14 @@ function Dashboard() {
         visibleLines={visibleLines}
         onPointClick={setSelectedPoint}
       /> */}
-      <div className="iframe-center">
+      {/* <div className="iframe-center">
         <iframe src="http://localhost:3001/d-solo/adm9ztp/new-dashboard?orgId=1&timezone=browser&refresh=5s&theme=dark&panelId=panel-1&__feature.dashboardSceneSolo=true" width="600" height="400" frameborder="0"></iframe>
+      </div> */}
+      <div className="graph-container">
+        <div className="graph-wrapper">
+          <iframe src="http://localhost:3001/d-solo/adm9ztp/new-dashboard?orgId=1&timezone=browser&refresh=5s&panelId=1&__feature.dashboardSceneSolo=true" width="450" height="200" frameborder="0"></iframe>
+        </div>
+
       </div>
 
       {selectedPoint && (

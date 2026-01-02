@@ -1,7 +1,5 @@
 import models from "../db/index.js";
 import io from "../config/io.config.js";
-import writePoint from "./influxService.js";
-import influxClient from "../config/influxdb.js";
 
 const Data = models.Data;
 
@@ -53,46 +51,8 @@ const postData = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-const postManyData = async (req, res) => {
-  try {
-    const dataArray = req.body;
-    let newData = [];
-    dataArray.forEach(async (item) => {
-      const isoTimeString = item.time || new Date().toISOString();
-      const time = handleTranferDate(isoTimeString);
-      const { temp, humi, light } = item;
-      newData.push(await Data.create({ time, temp, humi, light }));
-    });
-    res.status(200).json({
-      message: "Gửi dữ liệu thành công",
-      data: newData,
-    });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
 
-const generateSampleData = () => {
-  const temp = (Math.random() * 30 + 10);
-  const humi = (Math.random() * 50 + 30);
-  const light = (Math.random() * 200 + 100);
-  return { temp, humi, light };
-}
 
-const postSampleData = async () => {
-  try {
-    while (true) {
-      const sampleData = generateSampleData();
-      await Data.create(sampleData);
-      // io.emit("new_data", sampleData);
-      await writePoint(influxClient, sampleData);
-      console.log("Sample data posted:", sampleData);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Dừng 5 giây
-    }
-  } catch (err) {
-    console.error("Error in postSampleData:", err);
-  }
-}
 
 const formatTimeDisplay = (timeObj) => {
   if (!timeObj) return '';
@@ -170,6 +130,5 @@ export {
   getData,
   postData,
   getHistory,
-  getAlerts,
-  postSampleData
+  getAlerts
 };
