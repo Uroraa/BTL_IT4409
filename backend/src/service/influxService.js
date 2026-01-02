@@ -1,12 +1,11 @@
 import { Point } from '@influxdata/influxdb3-client';
-import { database } from '../db/models/influxData.js';
 const writePoint = async (influxClient, jsonData) => {
-    const point = new Point('data')
+    const point = new Point('DATA')
         .setField('temp', jsonData.temp)
         .setField('humi', jsonData.humi)
         .setField('light', jsonData.light)
         .setTimestamp(new Date());
-    await influxClient.write(point, database);
+    await influxClient.write(point, 'data');
 };
 
 export default writePoint;
