@@ -114,7 +114,7 @@ python simulator.py
 ```
 
 #### Grafana Dashboard
-Grafana sẽ chạy trên `http://localhost:3000` (nếu sử dụng Docker) hoặc `http://localhost:3001` ( nếu truy cập từ trình duyệt )
+Grafana sẽ chạy trên `http://localhost:3001`
 
 ### 5. Sử dụng
 
