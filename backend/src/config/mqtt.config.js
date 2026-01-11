@@ -60,6 +60,7 @@ mqttClient.on("message", async (topic, message) => {
       humi: jsonData.humi,
       light: jsonData.light,
     });
+    console.log(" Đã lưu MongoDB:", newData);
     //Luu vao influxDB 
     try {
       writePoint(influxClient, jsonData);
