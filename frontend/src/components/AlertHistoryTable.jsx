@@ -30,6 +30,26 @@ export default function AlertHistoryTable() {
     return alerts.slice(start, start + pageSize);
   }, [alerts, page, pageSize]);
 
+  const csvEscape = (v) => {
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  };
+
+  const exportCSV = () => {
+    if (!alerts || alerts.length === 0) return;
+    const header = 'Thời gian,Sensor,Giá trị,Mức cảnh báo\n';
+    const rowsCsv = alerts.map(a => `${csvEscape(a.time)},${csvEscape(a.sensor)},${csvEscape(a.value)},${csvEscape(a.level)}`).join('\n');
+    const blob = new Blob([header + rowsCsv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'alert_history.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <div className="filter-export" style={{ justifyContent: 'flex-end', marginBottom: 10 }}>
@@ -77,6 +97,10 @@ export default function AlertHistoryTable() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="export-csv-fixed">
+        <button onClick={exportCSV} disabled={alerts.length === 0}>Export CSV</button>
       </div>
     </div>
   );

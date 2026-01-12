@@ -39,6 +39,31 @@ export default function SensorHistoryTable() {
     return rows.slice(start, start + pageSize);
   }, [rows, page, pageSize]);
 
+  const csvEscape = (v) => {
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  };
+
+  const sensorNames = { temp: 'Nhiệt độ', humi: 'Độ ẩm', light: 'Ánh sáng' };
+
+  const exportCSV = () => {
+    if (!rows || rows.length === 0) return;
+    const header = 'Thời gian,type,Giá trị,Mức cảnh báo\n';
+    const rowsCsv = rows.map(r => {
+      const level = getLevelForValue(sensor, r.value);
+      return `${csvEscape(r.time)},${csvEscape(sensorNames[sensor] || sensor)},${csvEscape(r.value)},${csvEscape(level || '')}`;
+    }).join('\n');
+    const blob = new Blob([header + rowsCsv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${sensor}_history.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -94,6 +119,10 @@ export default function SensorHistoryTable() {
             })}
           </tbody>
         </table>
+      </div>
+
+      <div className="export-csv-fixed">
+        <button onClick={exportCSV} disabled={rows.length === 0}>Export CSV</button>
       </div>
     </div>
   );
