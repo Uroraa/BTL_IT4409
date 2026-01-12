@@ -1,8 +1,20 @@
 import { generateSensorMock, getSensorHistory as mockSensorHistory, getAlertHistory as mockAlertHistory } from './mocks/sensor.mock';
 
-const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6969';
+const RAW_API_BASE = import.meta.env.VITE_API_URL;
+const DEFAULT_LOCAL = 'http://localhost:6969';
+const BACKEND_BASE = (RAW_API_BASE && RAW_API_BASE.trim())
+  ? RAW_API_BASE.replace(/\/+$/, '')
+  : (import.meta.env.DEV ? DEFAULT_LOCAL : '');
 
-
+const baseHasApi = BACKEND_BASE.endsWith('/api');
+const apiUrl = (path) => {
+  const cleanedPath = path.startsWith('/') ? path : `/${path}`;
+  if (!BACKEND_BASE) return cleanedPath;
+  if (baseHasApi && cleanedPath.startsWith('/api/')) {
+    return `${BACKEND_BASE}${cleanedPath.slice(4)}`;
+  }
+  return `${BACKEND_BASE}${cleanedPath}`;
+};
 
 // prefer Vite env, fall back to default
 
@@ -38,8 +50,8 @@ export async function fetchDashboardData({ limit = 10, timeRange = 'ALL' } = {})
   appCache.dashboardKey = cacheKey;
   appCache.dashboardPromise = (async () => {
     // try backend endpoint; keep compatibility with earlier simple /sensors path
-    const url1 = `${BACKEND_BASE}/sensors?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`;
-    const url2 = `${BACKEND_BASE}/api/data?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`;
+    const url1 = apiUrl(`/sensors?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`);
+    const url2 = apiUrl(`/api/data?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`);
 
     let json = await tryFetchJson(url1);
     if (!json) json = await tryFetchJson(url2);
@@ -79,7 +91,7 @@ export async function getSensorHistory(sensorKey, count = 10, options = {}) {
 
   const p = (async () => {
     // Backend expects `limit` and lives under /api/history
-    const url = `${BACKEND_BASE}/api/history?sensor=${encodeURIComponent(sensorKey)}&limit=${count}`;
+    const url = apiUrl(`/api/history?sensor=${encodeURIComponent(sensorKey)}&limit=${count}`);
 
     let json = await tryFetchJson(url);
 
@@ -113,8 +125,8 @@ export async function getAlertHistory(count = 10) {
   if (appCache.alertPromise) return appCache.alertPromise;
 
   appCache.alertPromise = (async () => {
-    const url = `${BACKEND_BASE}/alerts?count=${count}`;
-    const url2 = `${BACKEND_BASE}/api/alerts?count=${count}`;
+    const url = apiUrl(`/alerts?count=${count}`);
+    const url2 = apiUrl(`/api/alerts?count=${count}`);
 
     let json = await tryFetchJson(url);
     if (!json) json = await tryFetchJson(url2);

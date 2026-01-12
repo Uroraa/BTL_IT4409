@@ -17,6 +17,18 @@ function Dashboard() {
     light: true
   });
 
+  const RAW_GRAFANA = import.meta.env.VITE_GRAFANA_URL;
+  const DEFAULT_GRAFANA = 'http://localhost:3001';
+  const GRAFANA_BASE = (RAW_GRAFANA && RAW_GRAFANA.trim())
+    ? RAW_GRAFANA.replace(/\/+$/, '')
+    : (import.meta.env.DEV ? DEFAULT_GRAFANA : '');
+
+  const grafanaUrl = (path) => {
+    const cleanedPath = path.startsWith('/') ? path : `/${path}`;
+    if (!GRAFANA_BASE) return cleanedPath;
+    return `${GRAFANA_BASE}${cleanedPath}`;
+  };
+
   // thresholds are persisted in localStorage so the "Thresholds" page can update them
   const DEFAULT_THRESHOLDS = {
     temp: { threshold: 26, dir: 'high', unit: '°C' },
@@ -236,25 +248,25 @@ function Dashboard() {
         onPointClick={setSelectedPoint}
       /> */}
       {/* <div className="iframe-center">
-        <iframe src="http://localhost:3001/d-solo/adm9ztp/new-dashboard?orgId=1&timezone=browser&refresh=5s&theme=dark&panelId=panel-1&__feature.dashboardSceneSolo=true" width="600" height="400" frameborder="0"></iframe>
+        <iframe src={grafanaUrl("/d-solo/adm9ztp/new-dashboard?orgId=1&timezone=browser&refresh=5s&theme=dark&panelId=panel-1&__feature.dashboardSceneSolo=true")} width="600" height="400" frameborder="0"></iframe>
       </div> */}
       
       <div className="metric-container">
         <div className="temp-metric">
-          <iframe src="http://localhost:3001/public-dashboards/e86f390796034576af3419c49fdb55c4" frameborder="0" scrolling="no"></iframe>
+          <iframe src={grafanaUrl("/public-dashboards/e86f390796034576af3419c49fdb55c4")} frameborder="0" scrolling="no"></iframe>
 
         </div>
         <div className="humi-metric">
-          <iframe src="http://localhost:3001/public-dashboards/0cabc4a8cdea4f768838ea0297d20083" frameborder="0" scrolling="no"></iframe>
+          <iframe src={grafanaUrl("/public-dashboards/0cabc4a8cdea4f768838ea0297d20083")} frameborder="0" scrolling="no"></iframe>
         </div>
         <div className="light-metric">
-          <iframe src="http://localhost:3001/public-dashboards/4d4a7420cbae461e9d171dd70a1f4fd8" frameborder="0" scrolling="no"></iframe>
+          <iframe src={grafanaUrl("/public-dashboards/4d4a7420cbae461e9d171dd70a1f4fd8")} frameborder="0" scrolling="no"></iframe>
         </div>
       </div>
 
       <div className="graph-container">
         <div className="graph-wrapper">
-          <iframe src="http://localhost:3001/public-dashboards/9c703e8abb1a42b095f7325b0b702885" frameborder="0" scrolling="no"></iframe>
+          <iframe src={grafanaUrl("/public-dashboards/9c703e8abb1a42b095f7325b0b702885")} frameborder="0" scrolling="no"></iframe>
         </div>
       </div>
 
