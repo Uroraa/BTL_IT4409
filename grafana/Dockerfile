@@ -1,0 +1,13 @@
+FROM grafana/grafana-oss:latest
+
+# Default settings aligned with grafana/docker-compose.yml
+ENV GF_SECURITY_ADMIN_USER=admin \
+    GF_SECURITY_ADMIN_PASSWORD=admin \
+    GF_SECURITY_ALLOW_EMBEDDING=true \
+    GF_AUTH_ANONYMOUS_ENABLED=true \
+    GF_AUTH_ANONYMOUS_ORG_NAME="Main Org." \
+    GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer \
+    GF_PANELS_DISABLE_MENU=true \
+    GF_PUBLIC_DASHBOARDS_ENABLED=true
+
+EXPOSE 3000
