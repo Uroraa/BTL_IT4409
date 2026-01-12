@@ -50,11 +50,8 @@ export async function fetchDashboardData({ limit = 10, timeRange = 'ALL' } = {})
   appCache.dashboardKey = cacheKey;
   appCache.dashboardPromise = (async () => {
     // try backend endpoint; keep compatibility with earlier simple /sensors path
-    const url1 = apiUrl(`/sensors?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`);
-    const url2 = apiUrl(`/api/data?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`);
-
-    let json = await tryFetchJson(url1);
-    if (!json) json = await tryFetchJson(url2);
+    const url = apiUrl(`/api/data?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`);
+    let json = await tryFetchJson(url);
 
     let result = null;
     if (json) {
@@ -125,11 +122,8 @@ export async function getAlertHistory(count = 10) {
   if (appCache.alertPromise) return appCache.alertPromise;
 
   appCache.alertPromise = (async () => {
-    const url = apiUrl(`/alerts?count=${count}`);
-    const url2 = apiUrl(`/api/alerts?count=${count}`);
-
+    const url = apiUrl(`/api/alerts?count=${count}`);
     let json = await tryFetchJson(url);
-    if (!json) json = await tryFetchJson(url2);
 
     if (json) {
       const res = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
