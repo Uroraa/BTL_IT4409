@@ -16,7 +16,7 @@ app.use('/', router);
 
 
 //CHẠY SERVER
-const port = 6969;
+const port = process.env.PORT || 6969;
 server.listen(port, '0.0.0.0', () => {
   console.log("Server is running on http://localhost:" + port);
 });
