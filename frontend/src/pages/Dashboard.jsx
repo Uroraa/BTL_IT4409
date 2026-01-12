@@ -197,7 +197,19 @@ function Dashboard() {
       </div> */}
       <div className="graph-container">
         <div className="graph-wrapper">
-          <iframe src="http://localhost:3001/d-solo/adm9ztp/new-dashboard?orgId=1&timezone=browser&refresh=5s&panelId=1&__feature.dashboardSceneSolo=true" frameborder="0"></iframe>
+          <iframe src="http://localhost:3001/public-dashboards/9c703e8abb1a42b095f7325b0b702885" frameborder="0" scrolling="no"></iframe>
+        </div>
+      </div>
+      <div className="metric-container">
+        <div className="temp-metric">
+          <iframe src="http://localhost:3001/public-dashboards/e86f390796034576af3419c49fdb55c4" frameborder="0" scrolling="no"></iframe>
+
+        </div>
+        <div className="humi-metric">
+          <iframe src="http://localhost:3001/public-dashboards/0cabc4a8cdea4f768838ea0297d20083" frameborder="0" scrolling="no"></iframe>
+        </div>
+        <div className="light-metric">
+          <iframe src="http://localhost:3001/public-dashboards/4d4a7420cbae461e9d171dd70a1f4fd8" frameborder="0" scrolling="no"></iframe>
         </div>
 
       </div>

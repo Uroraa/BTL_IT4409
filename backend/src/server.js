@@ -12,7 +12,7 @@ import { postSampleData } from "./service/GrafanaService.js";
 app.use(cors());
 app.use(express.json());
 app.use('/', router);
-// postSampleData();
+postSampleData();
 
 
 //CHẠY SERVER

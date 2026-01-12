@@ -626,9 +626,20 @@ h1 {
   max-width: 720px;
   margin: 0 auto;
   height: auto;
+
+}
+
+.metric-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px auto 0;
+  width: 100%;
+  max-width: 720px;
+  gap: 16px;
 }
 
 iframe {
   width: 100%;
   height: 400px;
+
 }

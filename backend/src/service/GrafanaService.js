@@ -31,9 +31,9 @@ const handleAlert = (req, res) => {
 
 const generateSampleData = () => {
     // const temp = (Math.random() * 30 + 10);
-    const temp = 31;
-    const humi = (Math.random() * 50 + 30);
-    const light = (Math.random() * 200 + 100);
+    const temp = (Math.random() * 40 + 10);
+    const humi = (Math.random() * 67.5 + 10);
+    const light = (Math.random() * 90 + 30);
     return { temp, humi, light };
 }
 

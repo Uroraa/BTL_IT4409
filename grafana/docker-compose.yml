@@ -9,7 +9,7 @@ services:
       - grafana-data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=1234
       - GF_SECURITY_ALLOW_EMBEDDING=true # Thêm dòng này để cho phép nhúng
       - GF_AUTH_ANONYMOUS_ENABLED=true # (Tùy chọn) Cho phép người khác xem biểu đồ mà không cần đăng nhập
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
