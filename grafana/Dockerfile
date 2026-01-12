@@ -2,7 +2,7 @@ FROM grafana/grafana-oss:latest
 
 # Default settings aligned with grafana/docker-compose.yml
 ENV GF_SECURITY_ADMIN_USER=admin \
-    GF_SECURITY_ADMIN_PASSWORD=1234 \
+    GF_SECURITY_ADMIN_PASSWORD=admin \
     GF_SECURITY_ALLOW_EMBEDDING=true \
     GF_AUTH_ANONYMOUS_ENABLED=true \
     GF_AUTH_ANONYMOUS_ORG_NAME="Main Org." \
