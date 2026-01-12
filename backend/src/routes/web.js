@@ -5,11 +5,9 @@ import { handleAlert } from '../service/GrafanaService.js';
 const router = express.Router();
 
 router.get('/', getDefault);
-router.get('/sensors', getData);
 router.get('/api/data', getData);
 router.get('/api/history', getHistory);
 router.get('/api/alerts', getAlerts);
-router.get('/alerts', getAlerts);
 
 router.post('/api/data', postData);
 router.post('/api/grafana/alert', handleAlert);

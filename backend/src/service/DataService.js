@@ -56,18 +56,12 @@ const postData = async (req, res) => {
 
 const formatTimeDisplay = (timeObj) => {
   if (!timeObj) return '';
-  let dateObject = null;
-  if (typeof timeObj === 'string' || timeObj instanceof Date) {
-    const parsed = new Date(timeObj);
-    if (!Number.isNaN(parsed.getTime())) dateObject = parsed;
-  }
-
-  const hh = String(dateObject ? dateObject.getHours() : (timeObj.hour ?? 0)).padStart(2, '0');
-  const mm = String(dateObject ? dateObject.getMinutes() : (timeObj.minute ?? 0)).padStart(2, '0');
-  const ss = String(dateObject ? dateObject.getSeconds() : (timeObj.second ?? 0)).padStart(2, '0');
-  const dd = String(dateObject ? dateObject.getDate() : (timeObj.day ?? 0)).padStart(2, '0');
-  const mo = String(dateObject ? (dateObject.getMonth() + 1) : (timeObj.month ?? 0)).padStart(2, '0');
-  const yyyy = String(dateObject ? dateObject.getFullYear() : (timeObj.year ?? ''));
+  const hh = String(timeObj.hour ?? 0).padStart(2, '0');
+  const mm = String(timeObj.minute ?? 0).padStart(2, '0');
+  const ss = String(timeObj.second ?? 0).padStart(2, '0');
+  const dd = String(timeObj.day ?? 0).padStart(2, '0');
+  const mo = String(timeObj.month ?? 0).padStart(2, '0');
+  const yyyy = String(timeObj.year ?? '');
   // dd/MM/yyyy HH:mm:ss
   return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
 };
