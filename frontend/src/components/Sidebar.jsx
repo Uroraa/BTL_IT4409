@@ -56,6 +56,21 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }) {
         >
           <span className="nav-text">Lịch sử</span>
         </NavLink>
+
+        <NavLink
+          to="/thresholds"
+          className={({ isActive }) =>
+            `nav-item ${isActive ? 'active' : ''}`
+          }
+          tabIndex={collapsed ? -1 : 0}
+          aria-disabled={collapsed}
+          onClick={(e) => {
+            if (collapsed) e.preventDefault();
+            handleNavClick();
+          }}
+        >
+          <span className="nav-text">Ngưỡng cảnh báo</span>
+        </NavLink>
       </nav>
 
       {/* Footer */}

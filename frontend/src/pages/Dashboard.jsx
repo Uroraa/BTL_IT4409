@@ -17,11 +17,39 @@ function Dashboard() {
     light: true
   });
 
-  const thresholds = {
-    temp: { threshold: 35, dir: 'high', unit: '°C' },
-    humi: { threshold: 40, dir: 'low', unit: '%' },
-    light: { threshold: 50, dir: 'low', unit: 'lux' }
+  // thresholds are persisted in localStorage so the "Thresholds" page can update them
+  const DEFAULT_THRESHOLDS = {
+    temp: { threshold: 26, dir: 'high', unit: '°C' },
+    humi: { threshold: 45, dir: 'low', unit: '%' },
+    light: { threshold: 60, dir: 'high', unit: 'lux' }
   };
+
+  const readThresholds = () => {
+    try {
+      const raw = localStorage.getItem('app:thresholds');
+      if (!raw) return DEFAULT_THRESHOLDS;
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_THRESHOLDS, ...parsed };
+    } catch {
+      return DEFAULT_THRESHOLDS;
+    }
+  };
+
+  const [thresholds, setThresholds] = useState(readThresholds);
+
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'app:thresholds') setThresholds(readThresholds());
+    };
+    window.addEventListener('storage', onStorage);
+    // also listen to custom event from same tab
+    const onCustom = () => setThresholds(readThresholds());
+    window.addEventListener('thresholds:updated', onCustom);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('thresholds:updated', onCustom);
+    };
+  }, []);
 
   const getStatus = (key, value) => {
     const cfg = thresholds[key];
@@ -66,9 +94,24 @@ function Dashboard() {
   const exportCSV = () => {
     if (chartData.length === 0) return;
 
+    const csvEscape = (v) => {
+      if (v === null || v === undefined) return '';
+      const s = String(v);
+      if (/[,"\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+
+    const timeStr = (t) => {
+      if (!t && t !== 0) return '';
+      if (typeof t === 'string') return t;
+      if (typeof t === 'number') return new Date(t).toISOString();
+      if (t && typeof t === 'object') return t.display || t.minute || (t.ts ? new Date(t.ts).toISOString() : '');
+      return '';
+    };
+
     const header = "time,temp,humi,light\n";
     const rows = chartData
-      .map(d => `${d.time},${d.temp},${d.humi},${d.light}`)
+      .map(d => `${csvEscape(timeStr(d.time))},${csvEscape(d.temp)},${csvEscape(d.humi)},${csvEscape(d.light)}`)
       .join("\n");
 
     const blob = new Blob([header + rows], { type: "text/csv" });
@@ -135,13 +178,13 @@ function Dashboard() {
       <h1>Sensor Dashboard</h1>
 
 
-      <div className="sensor-container">
+      {/* <div className="sensor-container">
         {sensors.map(sensor => (
           <SensorCard key={sensor.id} sensor={sensor} />
         ))}
-      </div>
+      </div> */}
 
-      <div className="control-box controls-horizontal">
+      {/* <div className="control-box controls-horizontal">
         <div className="controls-flex">
           <div className="checkbox-group">
             <label>
@@ -182,10 +225,10 @@ function Dashboard() {
               </select>
             </label>
 
-            <button onClick={exportCSV}>Export CSV</button>
+            
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* <SensorChart
         data={filteredData}
@@ -195,11 +238,7 @@ function Dashboard() {
       {/* <div className="iframe-center">
         <iframe src="http://localhost:3001/d-solo/adm9ztp/new-dashboard?orgId=1&timezone=browser&refresh=5s&theme=dark&panelId=panel-1&__feature.dashboardSceneSolo=true" width="600" height="400" frameborder="0"></iframe>
       </div> */}
-      <div className="graph-container">
-        <div className="graph-wrapper">
-          <iframe src="http://localhost:3001/public-dashboards/9c703e8abb1a42b095f7325b0b702885" frameborder="0" scrolling="no"></iframe>
-        </div>
-      </div>
+      
       <div className="metric-container">
         <div className="temp-metric">
           <iframe src="http://localhost:3001/public-dashboards/e86f390796034576af3419c49fdb55c4" frameborder="0" scrolling="no"></iframe>
@@ -211,17 +250,24 @@ function Dashboard() {
         <div className="light-metric">
           <iframe src="http://localhost:3001/public-dashboards/4d4a7420cbae461e9d171dd70a1f4fd8" frameborder="0" scrolling="no"></iframe>
         </div>
-
       </div>
 
-      {selectedPoint && (
+      <div className="graph-container">
+        <div className="graph-wrapper">
+          <iframe src="http://localhost:3001/public-dashboards/9c703e8abb1a42b095f7325b0b702885" frameborder="0" scrolling="no"></iframe>
+        </div>
+      </div>
+
+      <div className="export-csv-fixed"><button onClick={exportCSV}>Export CSV</button></div>
+      
+      {/* {selectedPoint && (
         <div className="detail-panel">
           <h3>Chi tiết tại {selectedPoint.time}</h3>
           <p>Nhiệt độ: {selectedPoint.temp} °C</p>
           <p>Độ ẩm: {selectedPoint.humi} %</p>
           <p>Ánh sáng: {selectedPoint.light} lux</p>
         </div>
-      )}
+      )} */} 
     </div>
   );
 }
