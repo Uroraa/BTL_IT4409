@@ -1,6 +1,7 @@
 import models from "../db/index.js";
 import writePoint from "./influxService.js";
 import influxClient from "../config/influxdb.js";
+import { handleTranferDate } from "./DataService.js";
 
 const Data = models.Data;
 
@@ -31,10 +32,12 @@ const handleAlert = (req, res) => {
 
 const generateSampleData = () => {
     // const temp = (Math.random() * 30 + 10);
+    const rawTime = new Date().toISOString();
+    const time = handleTranferDate(rawTime);
     const temp = (Math.random() * 40 + 10);
     const humi = (Math.random() * 67.5 + 10);
     const light = (Math.random() * 90 + 30);
-    return { temp, humi, light };
+    return { time, temp, humi, light };
 }
 
 const postSampleData = async () => {
@@ -44,8 +47,9 @@ const postSampleData = async () => {
             await Data.create(sampleData);
             // io.emit("new_data", sampleData);
             await writePoint(influxClient, sampleData);
+            console.log("Sample data posted to MongoDB and InfluxDB:", sampleData);
             // console.log("Sample data posted to InfluxDB:", sampleData);
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Dừng 1s
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Dừng 5s
         }
     } catch (err) {
         console.error("Error in postSampleData:", err);

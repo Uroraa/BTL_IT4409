@@ -9,14 +9,22 @@ export default function SensorHistoryTable() {
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
 
+  const url = "http://localhost:6969/api/data/history?sensor=" + sensor + "&limit=240";
+
   useEffect(() => {
     let mounted = true;
     // fetch a larger set and paginate client-side
     // request latest 20 minutes sampled every 5s -> 20*60/5 = 240
-    getSensorHistory(sensor, 240).then(data => {
-      if (mounted) setRows(data);
-    });
-    return () => { mounted = false; };
+    const fetchLatest = () => {
+      getSensorHistory(sensor, 240, { force: true }).then(data => {
+        if (mounted) setRows([...data].reverse());
+      });
+    };
+    // initial load
+    fetchLatest();
+    // poll for new data every 5 seconds
+    const id = setInterval(fetchLatest, 5000);
+    return () => { mounted = false; clearInterval(id); };
   }, [sensor]);
 
   useEffect(() => {

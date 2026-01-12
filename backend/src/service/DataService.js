@@ -58,16 +58,19 @@ const formatTimeDisplay = (timeObj) => {
   if (!timeObj) return '';
   const hh = String(timeObj.hour ?? 0).padStart(2, '0');
   const mm = String(timeObj.minute ?? 0).padStart(2, '0');
-  const dd = timeObj.day ?? '';
-  const mo = timeObj.month ?? '';
-  return `${hh}:${mm} ${dd}/${mo}`;
+  const ss = String(timeObj.second ?? 0).padStart(2, '0');
+  const dd = String(timeObj.day ?? 0).padStart(2, '0');
+  const mo = String(timeObj.month ?? 0).padStart(2, '0');
+  const yyyy = String(timeObj.year ?? '');
+  // dd/MM/yyyy HH:mm:ss
+  return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
 };
 
 const getHistory = async (req, res) => {
   try {
     const sensor = req.query.sensor || 'temp';
-    const count = parseInt(req.query.count) || 10;
-    const data = await Data.find({}).sort({ _id: -1 }).limit(count);
+    const limit = parseInt(req.query.limit) || 240;
+    const data = await Data.find({}).sort({ _id: -1 }).limit(limit);
     // newest first from DB; reverse to chronological
     data.reverse();
     const arr = data.map(pt => ({ time: formatTimeDisplay(pt.time), value: pt[sensor] }));
@@ -76,6 +79,7 @@ const getHistory = async (req, res) => {
     console.error('Error in getHistory', error);
     return res.status(500).json({ error: error.message });
   }
+
 };
 
 const getAlerts = async (req, res) => {
@@ -86,10 +90,15 @@ const getAlerts = async (req, res) => {
     const data = await Data.find({}).sort({ _id: -1 }).limit(fetchLimit);
 
     const thresholds = {
-      temp: { threshold: 35, dir: 'high' },
-      humi: { threshold: 40, dir: 'low' },
-      light: { threshold: 50, dir: 'low' }
-    };
+
+      temp: { threshold: 26, dir: 'high' },
+
+      humi: { threshold: 45, dir: 'low' },
+
+      light: { threshold: 60, dir: 'high' }
+
+    }
+      ;
 
     function levelFor(sensorKey, value) {
       const cfg = thresholds[sensorKey];

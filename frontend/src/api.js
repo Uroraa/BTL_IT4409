@@ -1,11 +1,11 @@
 import { generateSensorMock, getSensorHistory as mockSensorHistory, getAlertHistory as mockAlertHistory } from './mocks/sensor.mock';
 
-const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6969';
 
 
 
-  // prefer Vite env, fall back to default
-  
+// prefer Vite env, fall back to default
+
 
 async function tryFetchJson(url, opts) {
   try {
@@ -70,18 +70,18 @@ export async function fetchDashboardData({ limit = 10, timeRange = 'ALL' } = {})
   return appCache.dashboardPromise;
 }
 
-export async function getSensorHistory(sensorKey, count = 10) {
+export async function getSensorHistory(sensorKey, count = 10, options = {}) {
+  const { force = false } = options;
   const key = `${sensorKey}:${count}`;
-  if (appCache.sensorHistories[key]) {
+  if (!force && appCache.sensorHistories[key]) {
     return appCache.sensorHistories[key];
   }
 
   const p = (async () => {
-    const url = `${BACKEND_BASE}/history?sensor=${encodeURIComponent(sensorKey)}&count=${count}`;
-    const url2 = `${BACKEND_BASE}/api/history?sensor=${encodeURIComponent(sensorKey)}&count=${count}`;
+    // Backend expects `limit` and lives under /api/history
+    const url = `${BACKEND_BASE}/api/history?sensor=${encodeURIComponent(sensorKey)}&limit=${count}`;
 
     let json = await tryFetchJson(url);
-    if (!json) json = await tryFetchJson(url2);
 
     if (json) {
       if (Array.isArray(json)) return json;
@@ -99,7 +99,10 @@ export async function getSensorHistory(sensorKey, count = 10) {
     return arr.slice(-count);
   })();
 
-  appCache.sensorHistories[key] = p;
+  // Update cache with the latest resolved data
+  if (!force) {
+    appCache.sensorHistories[key] = p;
+  }
   const resolved = await p;
   appCache.sensorHistories[key] = resolved;
   return resolved;
