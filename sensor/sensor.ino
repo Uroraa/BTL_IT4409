@@ -123,7 +123,7 @@ void loop()
     }
 
     char msg[100];
-    snprintf(msg, 100, "{\"temp\":%.2f, \"hum\":%.2f, \"light\":%d}", t, h, lightValue);
+    snprintf(msg, 100, "{\"temp\":%.2f, \"humi\":%.2f, \"light\":%d}", t, h, lightValue);
 
     Serial.print("Gui: ");
     Serial.println(msg);
