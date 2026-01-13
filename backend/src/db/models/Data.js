@@ -11,7 +11,7 @@ const DataSchema = new mongoose.Schema({
   temp: { type: Number },
   humi: { type: Number },
   light: { type: Number },
-});
+}, { timestamps: true });
 
 const Data = mongoose.model("data", DataSchema);
 
