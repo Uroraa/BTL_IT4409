@@ -35,7 +35,10 @@ const getData = async (req, res) => {
 
 const postData = async (req, res) => {
   try {
-    const isoTimeString = req.body.time || new Date().toISOString();
+    // Sử dụng giờ Việt Nam (UTC+7) nếu không có time trong request
+    const now = new Date();
+    const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    const isoTimeString = req.body.time || vietnamTime.toISOString();
     const time = handleTranferDate(isoTimeString);
     const { temp, humi, light } = req.body;
     const newData = await Data.create({ time, temp, humi, light });

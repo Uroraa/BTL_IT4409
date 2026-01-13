@@ -49,9 +49,10 @@ mqttClient.on("message", async (topic, message) => {
       }
     }
 
-    // Xử lý thời gian
-    const now = new Date().toISOString();
-    const timeObj = handleTranferDate(now);
+    // Xử lý thời gian - sử dụng giờ Việt Nam (UTC+7)
+    const now = new Date();
+    const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    const timeObj = handleTranferDate(vietnamTime.toISOString());
 
     // Lưu vào mongoDB
     const newData = await Data.create({
