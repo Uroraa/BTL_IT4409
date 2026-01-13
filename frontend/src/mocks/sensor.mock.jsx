@@ -19,10 +19,19 @@ export function generateSensorMock(count = 10) {
     const hh = String(t.getHours()).padStart(2, '0');
     const mm = String(t.getMinutes()).padStart(2, '0');
     const ss = String(t.getSeconds()).padStart(2, '0');
+    const dd = String(t.getDate()).padStart(2, '0');
+    const mo = String(t.getMonth() + 1).padStart(2, '0');
+    const yyyy = t.getFullYear();
     return {
       time: {
         minute: String(Math.floor((now - (count - 1 - i) * spacing) / 60000)),
-        display: `${hh}:${mm}:${ss}`,
+        display: `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`,
+        hour: t.getHours(),
+        minute: t.getMinutes(),
+        second: t.getSeconds(),
+        day: t.getDate(),
+        month: t.getMonth() + 1,
+        year: yyyy,
         ts: t.getTime()
       },
       temp: rand(10, 100),
