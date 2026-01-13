@@ -1,16 +1,23 @@
-import { generateSensorMock, getSensorHistory as mockSensorHistory, getAlertHistory as mockAlertHistory } from './mocks/sensor.mock';
+import {
+  generateSensorMock,
+  getSensorHistory as mockSensorHistory,
+  getAlertHistory as mockAlertHistory,
+} from "./mocks/sensor.mock";
 
 const RAW_API_BASE = import.meta.env.VITE_API_URL;
-const DEFAULT_LOCAL = 'http://localhost:6969';
-const BACKEND_BASE = (RAW_API_BASE && RAW_API_BASE.trim())
-  ? RAW_API_BASE.replace(/\/+$/, '')
-  : (import.meta.env.DEV ? DEFAULT_LOCAL : '');
+const DEFAULT_LOCAL = "http://localhost:6969";
+const BACKEND_BASE =
+  RAW_API_BASE && RAW_API_BASE.trim()
+    ? RAW_API_BASE.replace(/\/+$/, "")
+    : import.meta.env.DEV
+    ? DEFAULT_LOCAL
+    : "";
 
-const baseHasApi = BACKEND_BASE.endsWith('/api');
+const baseHasApi = BACKEND_BASE.endsWith("/api");
 const apiUrl = (path) => {
-  const cleanedPath = path.startsWith('/') ? path : `/${path}`;
+  const cleanedPath = path.startsWith("/") ? path : `/${path}`;
   if (!BACKEND_BASE) return cleanedPath;
-  if (baseHasApi && cleanedPath.startsWith('/api/')) {
+  if (baseHasApi && cleanedPath.startsWith("/api/")) {
     return `${BACKEND_BASE}${cleanedPath.slice(4)}`;
   }
   return `${BACKEND_BASE}${cleanedPath}`;
@@ -18,15 +25,14 @@ const apiUrl = (path) => {
 
 // prefer Vite env, fall back to default
 
-
 async function tryFetchJson(url, opts) {
   try {
     const res = await fetch(url, opts);
-    if (!res.ok) throw new Error('bad response ' + res.status);
+    if (!res.ok) throw new Error("bad response " + res.status);
     const json = await res.json();
     return json;
   } catch (err) {
-    console.warn('api fetch failed', url, err.message);
+    console.warn("api fetch failed", url, err.message);
     return null;
   }
 }
@@ -39,18 +45,25 @@ const appCache = {
   sensorHistories: {}, // key: `${sensor}:${count}` => data or promise
   alertHistory: null,
   alertPromise: null,
-  mockBase: null // single mock dataset used as fallback for all endpoints
+  mockBase: null, // single mock dataset used as fallback for all endpoints
 };
 
-export async function fetchDashboardData({ limit = 10, timeRange = 'ALL' } = {}) {
+export async function fetchDashboardData({
+  limit = 10,
+  timeRange = "ALL",
+} = {}) {
   const cacheKey = `dashboard:${limit}:${timeRange}`;
-  if (appCache.dashboard && appCache.dashboardKey === cacheKey) return appCache.dashboard;
-  if (appCache.dashboardPromise && appCache.dashboardKey === cacheKey) return appCache.dashboardPromise;
+  if (appCache.dashboard && appCache.dashboardKey === cacheKey)
+    return appCache.dashboard;
+  if (appCache.dashboardPromise && appCache.dashboardKey === cacheKey)
+    return appCache.dashboardPromise;
 
   appCache.dashboardKey = cacheKey;
   appCache.dashboardPromise = (async () => {
     // try backend endpoint; keep compatibility with earlier simple /sensors path
-    const url = apiUrl(`/api/data?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`);
+    const url = apiUrl(
+      `/api/data?limit=${limit}&timeRange=${encodeURIComponent(timeRange)}`
+    );
     let json = await tryFetchJson(url);
 
     let result = null;
@@ -88,7 +101,9 @@ export async function getSensorHistory(sensorKey, count = 10, options = {}) {
 
   const p = (async () => {
     // Backend expects `limit` and lives under /api/history
-    const url = apiUrl(`/api/history?sensor=${encodeURIComponent(sensorKey)}&limit=${count}`);
+    const url = apiUrl(
+      `/api/history?sensor=${encodeURIComponent(sensorKey)}&limit=${count}`
+    );
 
     let json = await tryFetchJson(url);
 
@@ -98,12 +113,18 @@ export async function getSensorHistory(sensorKey, count = 10, options = {}) {
     }
 
     // fallback: derive from single mock base so all components share same mock data
-    if (!appCache.mockBase || (Array.isArray(appCache.mockBase) && appCache.mockBase.length < count)) {
+    if (
+      !appCache.mockBase ||
+      (Array.isArray(appCache.mockBase) && appCache.mockBase.length < count)
+    ) {
       appCache.mockBase = generateSensorMock(Math.max(60, count));
     }
 
     // map mock base to sensor-specific history
-    const arr = appCache.mockBase.map(pt => ({ time: (pt.time && (pt.time.display || pt.time.minute)) || '', value: pt[sensorKey] }));
+    const arr = appCache.mockBase.map((pt) => ({
+      time: (pt.time && (pt.time.display || pt.time.minute)) || "",
+      value: pt[sensorKey],
+    }));
     // return last `count` entries
     return arr.slice(-count);
   })();
@@ -134,44 +155,58 @@ export async function getAlertHistory(count = 10, options = {}) {
       let json = await tryFetchJson(url);
 
       if (json) {
-        const res = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
+        const res = Array.isArray(json)
+          ? json
+          : Array.isArray(json.data)
+          ? json.data
+          : [];
         appCache.alertHistory = res;
         appCache.alertPromise = null;
         return res;
       }
 
       // fallback: derive alerts from mockBase consistently
-      if (!appCache.mockBase || (Array.isArray(appCache.mockBase) && appCache.mockBase.length < count)) {
+      if (
+        !appCache.mockBase ||
+        (Array.isArray(appCache.mockBase) && appCache.mockBase.length < count)
+      ) {
         appCache.mockBase = generateSensorMock(Math.max(60, count));
       }
 
       // thresholds same as mock
       const thresholds = {
-        temp: { threshold: 35, dir: 'high' },
-        humi: { threshold: 40, dir: 'low' },
-        light: { threshold: 50, dir: 'low' }
+        temp: { threshold: 35, dir: "high" },
+        humi: { threshold: 40, dir: "low" },
+        light: { threshold: 50, dir: "low" },
       };
 
       function getLevelForValue(sensorKey, value) {
         const cfg = thresholds[sensorKey];
-        if (!cfg) return 'normal';
-        if (cfg.dir === 'high') {
-          if (value > cfg.threshold * 1.5) return 'critical';
-          if (value > cfg.threshold) return 'warning';
-          return 'normal';
+        if (!cfg) return "normal";
+        if (cfg.dir === "high") {
+          if (value > cfg.threshold * 1.5) return "critical";
+          if (value > cfg.threshold) return "warning";
+          return "normal";
         } else {
-          if (value < cfg.threshold / 1.5) return 'critical';
-          if (value < cfg.threshold) return 'warning';
-          return 'normal';
+          if (value < cfg.threshold / 1.5) return "critical";
+          if (value < cfg.threshold) return "warning";
+          return "normal";
         }
       }
 
       const alerts = [];
-      ['temp', 'humi', 'light'].forEach(sensorKey => {
-        appCache.mockBase.forEach(point => {
+      ["temp", "humi", "light"].forEach((sensorKey) => {
+        appCache.mockBase.forEach((point) => {
           const level = getLevelForValue(sensorKey, point[sensorKey]);
-          if (level !== 'normal') {
-            alerts.push({ time: (point.time && (point.time.display || point.time.minute)) || '', sensorKey, sensor: sensorKey, value: point[sensorKey], level });
+          if (level !== "normal") {
+            alerts.push({
+              time:
+                (point.time && (point.time.display || point.time.minute)) || "",
+              sensorKey,
+              sensor: sensorKey,
+              value: point[sensorKey],
+              level,
+            });
           }
         });
       });
@@ -182,7 +217,7 @@ export async function getAlertHistory(count = 10, options = {}) {
       appCache.alertPromise = null;
       return result;
     } catch (error) {
-      console.error('Error in getAlertHistory:', error);
+      console.error("Error in getAlertHistory:", error);
       return [];
     }
   })();
@@ -194,20 +229,20 @@ export async function getAlertHistory(count = 10, options = {}) {
 
 export function getLevelForValue(sensorKey, value) {
   const thresholds = {
-    temp: { threshold: 35, dir: 'high' },
-    humi: { threshold: 40, dir: 'low' },
-    light: { threshold: 50, dir: 'low' }
+    temp: { threshold: 26, dir: "high" },
+    humi: { threshold: 45, dir: "low" },
+    light: { threshold: 600, dir: "low" },
   };
 
   const cfg = thresholds[sensorKey];
-  if (!cfg) return 'normal';
-  if (cfg.dir === 'high') {
-    if (value > cfg.threshold * 1.5) return 'critical';
-    if (value > cfg.threshold) return 'warning';
-    return 'normal';
+  if (!cfg) return "normal";
+  if (cfg.dir === "high") {
+    if (value > cfg.threshold * 1.5) return "critical";
+    if (value > cfg.threshold) return "warning";
+    return "normal";
   } else {
-    if (value < cfg.threshold / 1.5) return 'critical';
-    if (value < cfg.threshold) return 'warning';
-    return 'normal';
+    if (value < cfg.threshold / 1.5) return "critical";
+    if (value < cfg.threshold) return "warning";
+    return "normal";
   }
 }
