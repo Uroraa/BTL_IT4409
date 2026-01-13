@@ -56,6 +56,15 @@ const postData = async (req, res) => {
 
 const formatTimeDisplay = (timeObj) => {
   if (!timeObj) return '';
+  if (timeObj instanceof Date) {
+    const hh = String(timeObj.getHours()).padStart(2, '0');
+    const mm = String(timeObj.getMinutes()).padStart(2, '0');
+    const ss = String(timeObj.getSeconds()).padStart(2, '0');
+    const dd = String(timeObj.getDate()).padStart(2, '0');
+    const mo = String(timeObj.getMonth() + 1).padStart(2, '0');
+    const yyyy = String(timeObj.getFullYear());
+    return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
+  }
   const hh = String(timeObj.hour ?? 0).padStart(2, '0');
   const mm = String(timeObj.minute ?? 0).padStart(2, '0');
   const ss = String(timeObj.second ?? 0).padStart(2, '0');
@@ -66,6 +75,15 @@ const formatTimeDisplay = (timeObj) => {
   return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
 };
 
+const getDocTime = (doc) => {
+  if (doc?.time && typeof doc.time === 'object') return doc.time;
+  if (doc?.createdAt instanceof Date) return doc.createdAt;
+  if (doc?._id && typeof doc._id.getTimestamp === 'function') {
+    return doc._id.getTimestamp();
+  }
+  return null;
+};
+
 const getHistory = async (req, res) => {
   try {
     const sensor = req.query.sensor || 'temp';
@@ -73,7 +91,7 @@ const getHistory = async (req, res) => {
     const data = await Data.find({}).sort({ _id: -1 }).limit(limit);
     // newest first from DB; reverse to chronological
     data.reverse();
-    const arr = data.map(pt => ({ time: formatTimeDisplay(pt.time), value: pt[sensor] }));
+    const arr = data.map(pt => ({ time: formatTimeDisplay(getDocTime(pt)), value: pt[sensor] }));
     return res.status(200).json(arr);
   } catch (error) {
     console.error('Error in getHistory', error);
@@ -119,7 +137,7 @@ const getAlerts = async (req, res) => {
       ['temp', 'humi', 'light'].forEach(sensorKey => {
         const lvl = levelFor(sensorKey, pt[sensorKey]);
         if (lvl !== 'normal') {
-          alerts.push({ time: formatTimeDisplay(pt.time), sensorKey, sensor: sensorKey, value: pt[sensorKey], level: lvl });
+          alerts.push({ time: formatTimeDisplay(getDocTime(pt)), sensorKey, sensor: sensorKey, value: pt[sensorKey], level: lvl });
         }
       });
     });
