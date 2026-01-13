@@ -57,15 +57,25 @@ const postData = async (req, res) => {
 
 
 
+const VN_TZ_OFFSET_MIN = -7 * 60;
+
+const toVietnamDate = (date) => {
+  if (!(date instanceof Date)) return null;
+  const localOffsetMin = date.getTimezoneOffset();
+  const diffMin = localOffsetMin - VN_TZ_OFFSET_MIN;
+  return new Date(date.getTime() + diffMin * 60 * 1000);
+};
+
 const formatTimeDisplay = (timeObj) => {
   if (!timeObj) return '';
   if (timeObj instanceof Date) {
-    const hh = String(timeObj.getHours()).padStart(2, '0');
-    const mm = String(timeObj.getMinutes()).padStart(2, '0');
-    const ss = String(timeObj.getSeconds()).padStart(2, '0');
-    const dd = String(timeObj.getDate()).padStart(2, '0');
-    const mo = String(timeObj.getMonth() + 1).padStart(2, '0');
-    const yyyy = String(timeObj.getFullYear());
+    const vnDate = toVietnamDate(timeObj) || timeObj;
+    const hh = String(vnDate.getHours()).padStart(2, '0');
+    const mm = String(vnDate.getMinutes()).padStart(2, '0');
+    const ss = String(vnDate.getSeconds()).padStart(2, '0');
+    const dd = String(vnDate.getDate()).padStart(2, '0');
+    const mo = String(vnDate.getMonth() + 1).padStart(2, '0');
+    const yyyy = String(vnDate.getFullYear());
     return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
   }
   const hh = String(timeObj.hour ?? 0).padStart(2, '0');
@@ -88,12 +98,27 @@ const isValidTimeObj = (timeObj) => {
 };
 
 const getDocTime = (doc) => {
-  if (doc?.time && typeof doc.time === 'object' && isValidTimeObj(doc.time)) {
-    return doc.time;
-  }
   if (doc?.createdAt instanceof Date) return doc.createdAt;
   if (doc?._id && typeof doc._id.getTimestamp === 'function') {
     return doc._id.getTimestamp();
+  }
+  if (doc?.time && typeof doc.time === 'object' && isValidTimeObj(doc.time)) {
+    return doc.time;
+  }
+  return null;
+};
+
+const getDocTimeMs = (doc) => {
+  const t = getDocTime(doc);
+  if (t instanceof Date) return t.getTime();
+  if (t && typeof t === 'object' && isValidTimeObj(t)) {
+    const year = Number(t.year);
+    const month = Number(t.month) - 1;
+    const day = Number(t.day);
+    const hour = Number(t.hour ?? 0);
+    const minute = Number(t.minute ?? 0);
+    const second = Number(t.second ?? 0);
+    return new Date(year, month, day, hour, minute, second).getTime();
   }
   return null;
 };
@@ -102,10 +127,28 @@ const getHistory = async (req, res) => {
   try {
     const sensor = req.query.sensor || 'temp';
     const limit = parseInt(req.query.limit) || 240;
-    const data = await Data.find({}).sort({ _id: -1 }).limit(limit);
+    const fetchLimit = Math.max(limit * 3, limit);
+    const data = await Data.find({}).sort({ _id: -1 }).limit(fetchLimit);
     // newest first from DB; reverse to chronological
     data.reverse();
-    const arr = data.map(pt => ({ time: formatTimeDisplay(getDocTime(pt)), value: pt[sensor] }));
+    const bucketMs = 5000;
+    const deduped = [];
+    let lastBucket = null;
+    data.forEach(pt => {
+      const ms = getDocTimeMs(pt);
+      if (ms == null) {
+        deduped.push(pt);
+        return;
+      }
+      const bucket = Math.floor(ms / bucketMs);
+      if (bucket === lastBucket) return;
+      lastBucket = bucket;
+      deduped.push(pt);
+    });
+
+    const arr = deduped
+      .slice(-limit)
+      .map(pt => ({ time: formatTimeDisplay(getDocTime(pt)), value: pt[sensor] }));
     return res.status(200).json(arr);
   } catch (error) {
     console.error('Error in getHistory', error);
