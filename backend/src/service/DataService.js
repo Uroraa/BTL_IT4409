@@ -138,10 +138,15 @@ const getHistory = async (req, res) => {
       const ms = getDocTimeMs(pt);
       if (ms == null) {
         deduped.push(pt);
+        lastBucket = null;
         return;
       }
       const bucket = Math.floor(ms / bucketMs);
-      if (bucket === lastBucket) return;
+      if (bucket === lastBucket) {
+        // Replace with the newest record in the same 5s bucket.
+        deduped[deduped.length - 1] = pt;
+        return;
+      }
       lastBucket = bucket;
       deduped.push(pt);
     });
