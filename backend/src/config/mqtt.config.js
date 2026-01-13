@@ -6,15 +6,14 @@ import models from "../db/index.js";
 import influxClient from "./influxdb.js";
 import writePoint from "../service/influxService.js";
 
-
-const [Data, point] = [models.Data, models.point]
+const [Data, point] = [models.Data, models.point];
 
 const mqttClient = mqtt.connect(
   `mqtts://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`,
   {
     username: process.env.MQTT_USER,
     password: process.env.MQTT_PASS,
-    rejectUnauthorized: false, // Bỏ qua lỗi chứng chỉ SSL
+    rejectUnauthorized: false,
   }
 );
 
@@ -24,11 +23,10 @@ mqttClient.on("connect", () => {
 });
 
 mqttClient.on("error", (err) => {
-  // Xử lý lỗi kết nối
   console.error("Lỗi kết nối MQTT:", err);
 });
 
-// ĐỊNH NGHĨA TOPIC CẢNH BÁO
+// TOPIC CẢNH BÁO
 const ALERT_TOPIC = "home/alert";
 
 mqttClient.on("message", async (topic, message) => {
@@ -36,25 +34,33 @@ mqttClient.on("message", async (topic, message) => {
     const rawMsg = message.toString();
     const jsonData = JSON.parse(rawMsg);
 
-    // LOGIC CẢNH BÁO
-    // Nếu không có dữ liệu nhiệt độ thì bỏ qua
-    if (jsonData.temp !== undefined) {
-      if (jsonData.temp > 35) {
-        console.log(
-          `⚠️ CẢNH BÁO: Nhiệt độ cao (${jsonData.temp}°C) -> Gửi lệnh BẬT LED`
-        );
-        mqttClient.publish(ALERT_TOPIC, "ON");
-      } else {
-        mqttClient.publish(ALERT_TOPIC, "OFF");
-      }
+    let isAlert = false;
+    let reasons = [];
+
+    if (jsonData.temp !== undefined && jsonData.temp > 26) {
+      isAlert = true;
+      reasons.push(`Nhiệt độ cao (${jsonData.temp})`);
     }
 
-    // Xử lý thời gian - sử dụng giờ Việt Nam (UTC+7)
-    const now = new Date();
-    const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
-    const timeObj = handleTranferDate(vietnamTime.toISOString());
+    if (jsonData.humi !== undefined && jsonData.humi < 45) {
+      isAlert = true;
+      reasons.push(`Độ ẩm thấp (${jsonData.humi})`);
+    }
 
-    // Lưu vào mongoDB
+    if (jsonData.light !== undefined && jsonData.light < 600) {
+      isAlert = true;
+      reasons.push(`Ánh sáng yếu (${jsonData.light})`);
+    }
+
+    if (isAlert) {
+      console.log(`⚠️ CẢNH BÁO: ${reasons.join(", ")} -> Gửi lệnh ON`);
+      mqttClient.publish(ALERT_TOPIC, "ON");
+    } else {
+      mqttClient.publish(ALERT_TOPIC, "OFF");
+    }
+    const now = new Date().toISOString();
+    const timeObj = handleTranferDate(now);
+
     const newData = await Data.create({
       time: timeObj,
       temp: jsonData.temp,
@@ -62,19 +68,15 @@ mqttClient.on("message", async (topic, message) => {
       light: jsonData.light,
     });
     console.log(" Đã lưu MongoDB:", newData);
-    //Luu vao influxDB 
+
     try {
       writePoint(influxClient, jsonData);
-      console.log(' Đã lưu InfluxDB:', jsonData);
-
+      console.log(" Đã lưu InfluxDB:", jsonData);
     } catch (error) {
-      console.error(' Lỗi lưu InfluxDB:', error.message);
+      console.error(" Lỗi lưu InfluxDB:", error.message);
     }
 
-    // Gửi dữ liệu tới Frontend
     io.emit("new_data", newData);
-
-    console.log(" Đã lưu DB & Emit Socket:", jsonData);
   } catch (err) {
     console.error(" Lỗi xử lý tin nhắn MQTT:", err.message);
   }

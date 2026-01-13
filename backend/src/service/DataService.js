@@ -37,7 +37,7 @@ const postData = async (req, res) => {
   try {
     // Sử dụng giờ Việt Nam (UTC+7) nếu không có time trong request
     const now = new Date();
-    const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    const vietnamTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
     const isoTimeString = req.body.time || vietnamTime.toISOString();
     const time = handleTranferDate(isoTimeString);
     const { temp, humi, light } = req.body;
@@ -55,8 +55,6 @@ const postData = async (req, res) => {
   }
 };
 
-
-
 const VN_TZ_OFFSET_MIN = -7 * 60;
 
 const toVietnamDate = (date) => {
@@ -67,29 +65,29 @@ const toVietnamDate = (date) => {
 };
 
 const formatTimeDisplay = (timeObj) => {
-  if (!timeObj) return '';
+  if (!timeObj) return "";
   if (timeObj instanceof Date) {
     const vnDate = toVietnamDate(timeObj) || timeObj;
-    const hh = String(vnDate.getHours()).padStart(2, '0');
-    const mm = String(vnDate.getMinutes()).padStart(2, '0');
-    const ss = String(vnDate.getSeconds()).padStart(2, '0');
-    const dd = String(vnDate.getDate()).padStart(2, '0');
-    const mo = String(vnDate.getMonth() + 1).padStart(2, '0');
+    const hh = String(vnDate.getHours()).padStart(2, "0");
+    const mm = String(vnDate.getMinutes()).padStart(2, "0");
+    const ss = String(vnDate.getSeconds()).padStart(2, "0");
+    const dd = String(vnDate.getDate()).padStart(2, "0");
+    const mo = String(vnDate.getMonth() + 1).padStart(2, "0");
     const yyyy = String(vnDate.getFullYear());
     return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
   }
-  const hh = String(timeObj.hour ?? 0).padStart(2, '0');
-  const mm = String(timeObj.minute ?? 0).padStart(2, '0');
-  const ss = String(timeObj.second ?? 0).padStart(2, '0');
-  const dd = String(timeObj.day ?? 0).padStart(2, '0');
-  const mo = String(timeObj.month ?? 0).padStart(2, '0');
-  const yyyy = String(timeObj.year ?? '');
+  const hh = String(timeObj.hour ?? 0).padStart(2, "0");
+  const mm = String(timeObj.minute ?? 0).padStart(2, "0");
+  const ss = String(timeObj.second ?? 0).padStart(2, "0");
+  const dd = String(timeObj.day ?? 0).padStart(2, "0");
+  const mo = String(timeObj.month ?? 0).padStart(2, "0");
+  const yyyy = String(timeObj.year ?? "");
   // dd/MM/yyyy HH:mm:ss
   return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
 };
 
 const isValidTimeObj = (timeObj) => {
-  if (!timeObj || typeof timeObj !== 'object') return false;
+  if (!timeObj || typeof timeObj !== "object") return false;
   const year = Number(timeObj.year);
   const month = Number(timeObj.month);
   const day = Number(timeObj.day);
@@ -99,10 +97,10 @@ const isValidTimeObj = (timeObj) => {
 
 const getDocTime = (doc) => {
   if (doc?.createdAt instanceof Date) return doc.createdAt;
-  if (doc?._id && typeof doc._id.getTimestamp === 'function') {
+  if (doc?._id && typeof doc._id.getTimestamp === "function") {
     return doc._id.getTimestamp();
   }
-  if (doc?.time && typeof doc.time === 'object' && isValidTimeObj(doc.time)) {
+  if (doc?.time && typeof doc.time === "object" && isValidTimeObj(doc.time)) {
     return doc.time;
   }
   return null;
@@ -111,7 +109,7 @@ const getDocTime = (doc) => {
 const getDocTimeMs = (doc) => {
   const t = getDocTime(doc);
   if (t instanceof Date) return t.getTime();
-  if (t && typeof t === 'object' && isValidTimeObj(t)) {
+  if (t && typeof t === "object" && isValidTimeObj(t)) {
     const year = Number(t.year);
     const month = Number(t.month) - 1;
     const day = Number(t.day);
@@ -125,7 +123,7 @@ const getDocTimeMs = (doc) => {
 
 const getHistory = async (req, res) => {
   try {
-    const sensor = req.query.sensor || 'temp';
+    const sensor = req.query.sensor || "temp";
     const limit = parseInt(req.query.limit) || 240;
     const fetchLimit = Math.max(limit * 3, limit);
     const data = await Data.find({}).sort({ _id: -1 }).limit(fetchLimit);
@@ -134,7 +132,7 @@ const getHistory = async (req, res) => {
     const bucketMs = 5000;
     const deduped = [];
     let lastBucket = null;
-    data.forEach(pt => {
+    data.forEach((pt) => {
       const ms = getDocTimeMs(pt);
       if (ms == null) {
         deduped.push(pt);
@@ -151,15 +149,15 @@ const getHistory = async (req, res) => {
       deduped.push(pt);
     });
 
-    const arr = deduped
-      .slice(-limit)
-      .map(pt => ({ time: formatTimeDisplay(getDocTime(pt)), value: pt[sensor] }));
+    const arr = deduped.slice(-limit).map((pt) => ({
+      time: formatTimeDisplay(getDocTime(pt)),
+      value: pt[sensor],
+    }));
     return res.status(200).json(arr);
   } catch (error) {
-    console.error('Error in getHistory', error);
+    console.error("Error in getHistory", error);
     return res.status(500).json({ error: error.message });
   }
-
 };
 
 const getAlerts = async (req, res) => {
@@ -170,36 +168,38 @@ const getAlerts = async (req, res) => {
     const data = await Data.find({}).sort({ _id: -1 }).limit(fetchLimit);
 
     const thresholds = {
+      temp: { threshold: 26, dir: "high" },
 
-      temp: { threshold: 26, dir: 'high' },
+      humi: { threshold: 45, dir: "low" },
 
-      humi: { threshold: 45, dir: 'low' },
-
-      light: { threshold: 60, dir: 'high' }
-
-    }
-      ;
-
+      light: { threshold: 600, dir: "low" },
+    };
     function levelFor(sensorKey, value) {
       const cfg = thresholds[sensorKey];
-      if (!cfg || value == null) return 'normal';
-      if (cfg.dir === 'high') {
-        if (value > cfg.threshold * 1.5) return 'critical';
-        if (value > cfg.threshold) return 'warning';
-        return 'normal';
+      if (!cfg || value == null) return "normal";
+      if (cfg.dir === "high") {
+        if (value > cfg.threshold * 1.5) return "critical";
+        if (value > cfg.threshold) return "warning";
+        return "normal";
       } else {
-        if (value < cfg.threshold / 1.5) return 'critical';
-        if (value < cfg.threshold) return 'warning';
-        return 'normal';
+        if (value < cfg.threshold / 1.5) return "critical";
+        if (value < cfg.threshold) return "warning";
+        return "normal";
       }
     }
 
     const alerts = [];
-    data.forEach(pt => {
-      ['temp', 'humi', 'light'].forEach(sensorKey => {
+    data.forEach((pt) => {
+      ["temp", "humi", "light"].forEach((sensorKey) => {
         const lvl = levelFor(sensorKey, pt[sensorKey]);
-        if (lvl !== 'normal') {
-          alerts.push({ time: formatTimeDisplay(getDocTime(pt)), sensorKey, sensor: sensorKey, value: pt[sensorKey], level: lvl });
+        if (lvl !== "normal") {
+          alerts.push({
+            time: formatTimeDisplay(getDocTime(pt)),
+            sensorKey,
+            sensor: sensorKey,
+            value: pt[sensorKey],
+            level: lvl,
+          });
         }
       });
     });
@@ -208,7 +208,7 @@ const getAlerts = async (req, res) => {
     const result = alerts.reverse().slice(0, count);
     return res.status(200).json(result);
   } catch (error) {
-    console.error('Error in getAlerts', error);
+    console.error("Error in getAlerts", error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -219,5 +219,5 @@ export {
   getData,
   postData,
   getHistory,
-  getAlerts
+  getAlerts,
 };

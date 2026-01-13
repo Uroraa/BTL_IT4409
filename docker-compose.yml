@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  influxdb:
+    image: influxdb:1.8
+    container_name: iot_influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=iot_project
+
+  grafana:
+    image: grafana/grafana
+    container_name: iot_grafana
+    ports:
+      - "3000:3000"
+    links:
+      - influxdb
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  influxdb_data:
+  grafana_data:
