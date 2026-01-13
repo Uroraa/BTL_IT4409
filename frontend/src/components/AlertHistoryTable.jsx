@@ -11,10 +11,16 @@ export default function AlertHistoryTable() {
     let mounted = true;
     // fetch a larger set and paginate client-side
     // request latest 20 minutes sampled every 5s -> 20*60/5 = 240
-    const fetchLatest = () => {
-      getAlertHistory(240).then(data => {
-        if (mounted) setAlerts(data);
-      });
+    const fetchLatest = async () => {
+      try {
+        const data = await getAlertHistory(240, { force: true });
+        if (mounted && Array.isArray(data)) {
+          setAlerts([...data].reverse());
+        }
+      } catch (err) {
+        console.error('Error fetching alert history:', err);
+        if (mounted) setAlerts([]);
+      }
     };
     // initial load
     fetchLatest();

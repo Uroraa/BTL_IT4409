@@ -117,65 +117,79 @@ export async function getSensorHistory(sensorKey, count = 10, options = {}) {
   return resolved;
 }
 
-export async function getAlertHistory(count = 10) {
-  if (appCache.alertHistory) return appCache.alertHistory;
-  if (appCache.alertPromise) return appCache.alertPromise;
+export async function getAlertHistory(count = 10, options = {}) {
+  const { force = false } = options;
+
+  // Return cached data if available and not forcing refresh
+  if (!force && appCache.alertHistory) {
+    return appCache.alertHistory;
+  }
+  if (!force && appCache.alertPromise) {
+    return appCache.alertPromise;
+  }
 
   appCache.alertPromise = (async () => {
-    const url = apiUrl(`/api/alerts?count=${count}`);
-    let json = await tryFetchJson(url);
+    try {
+      const url = apiUrl(`/api/alerts?count=${count}`);
+      let json = await tryFetchJson(url);
 
-    if (json) {
-      const res = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
-      appCache.alertHistory = res;
-      appCache.alertPromise = null;
-      return res;
-    }
-
-    // fallback: derive alerts from mockBase consistently
-    if (!appCache.mockBase || (Array.isArray(appCache.mockBase) && appCache.mockBase.length < count)) {
-      appCache.mockBase = generateSensorMock(Math.max(60, count));
-    }
-
-    // thresholds same as mock
-    const thresholds = {
-      temp: { threshold: 35, dir: 'high' },
-      humi: { threshold: 40, dir: 'low' },
-      light: { threshold: 50, dir: 'low' }
-    };
-
-    function getLevelForValue(sensorKey, value) {
-      const cfg = thresholds[sensorKey];
-      if (!cfg) return 'normal';
-      if (cfg.dir === 'high') {
-        if (value > cfg.threshold * 1.5) return 'critical';
-        if (value > cfg.threshold) return 'warning';
-        return 'normal';
-      } else {
-        if (value < cfg.threshold / 1.5) return 'critical';
-        if (value < cfg.threshold) return 'warning';
-        return 'normal';
+      if (json) {
+        const res = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
+        appCache.alertHistory = res;
+        appCache.alertPromise = null;
+        return res;
       }
-    }
 
-    const alerts = [];
-    ['temp', 'humi', 'light'].forEach(sensorKey => {
-      appCache.mockBase.forEach(point => {
-        const level = getLevelForValue(sensorKey, point[sensorKey]);
-        if (level !== 'normal') {
-          alerts.push({ time: (point.time && (point.time.display || point.time.minute)) || '', sensorKey, sensor: sensorKey, value: point[sensorKey], level });
+      // fallback: derive alerts from mockBase consistently
+      if (!appCache.mockBase || (Array.isArray(appCache.mockBase) && appCache.mockBase.length < count)) {
+        appCache.mockBase = generateSensorMock(Math.max(60, count));
+      }
+
+      // thresholds same as mock
+      const thresholds = {
+        temp: { threshold: 35, dir: 'high' },
+        humi: { threshold: 40, dir: 'low' },
+        light: { threshold: 50, dir: 'low' }
+      };
+
+      function getLevelForValue(sensorKey, value) {
+        const cfg = thresholds[sensorKey];
+        if (!cfg) return 'normal';
+        if (cfg.dir === 'high') {
+          if (value > cfg.threshold * 1.5) return 'critical';
+          if (value > cfg.threshold) return 'warning';
+          return 'normal';
+        } else {
+          if (value < cfg.threshold / 1.5) return 'critical';
+          if (value < cfg.threshold) return 'warning';
+          return 'normal';
         }
-      });
-    });
+      }
 
-    // newest first
-    const result = alerts.reverse().slice(0, count);
-    appCache.alertHistory = result;
-    appCache.alertPromise = null;
-    return result;
+      const alerts = [];
+      ['temp', 'humi', 'light'].forEach(sensorKey => {
+        appCache.mockBase.forEach(point => {
+          const level = getLevelForValue(sensorKey, point[sensorKey]);
+          if (level !== 'normal') {
+            alerts.push({ time: (point.time && (point.time.display || point.time.minute)) || '', sensorKey, sensor: sensorKey, value: point[sensorKey], level });
+          }
+        });
+      });
+
+      // newest first
+      const result = alerts.reverse().slice(0, count);
+      appCache.alertHistory = result;
+      appCache.alertPromise = null;
+      return result;
+    } catch (error) {
+      console.error('Error in getAlertHistory:', error);
+      return [];
+    }
   })();
 
-  return appCache.alertPromise;
+  const resolved = await appCache.alertPromise;
+  appCache.alertHistory = resolved;
+  return resolved;
 }
 
 export function getLevelForValue(sensorKey, value) {
