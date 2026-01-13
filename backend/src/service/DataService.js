@@ -75,8 +75,19 @@ const formatTimeDisplay = (timeObj) => {
   return `${hh}:${mm}:${ss} ${dd}/${mo}/${yyyy}`;
 };
 
+const isValidTimeObj = (timeObj) => {
+  if (!timeObj || typeof timeObj !== 'object') return false;
+  const year = Number(timeObj.year);
+  const month = Number(timeObj.month);
+  const day = Number(timeObj.day);
+  if (!year || !month || !day) return false;
+  return true;
+};
+
 const getDocTime = (doc) => {
-  if (doc?.time && typeof doc.time === 'object') return doc.time;
+  if (doc?.time && typeof doc.time === 'object' && isValidTimeObj(doc.time)) {
+    return doc.time;
+  }
   if (doc?.createdAt instanceof Date) return doc.createdAt;
   if (doc?._id && typeof doc._id.getTimestamp === 'function') {
     return doc._id.getTimestamp();
