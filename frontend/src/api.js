@@ -6,12 +6,14 @@ import {
 
 const RAW_API_BASE = import.meta.env.VITE_API_URL;
 const DEFAULT_LOCAL = "http://localhost:6969";
-const BACKEND_BASE =
-  RAW_API_BASE && RAW_API_BASE.trim()
-    ? RAW_API_BASE.replace(/\/+$/, "")
-    : import.meta.env.DEV
-    ? DEFAULT_LOCAL
-    : "";
+const DEFAULT_PROD = "https://btl-it4409.onrender.com";
+const normalizedRaw =
+  RAW_API_BASE && RAW_API_BASE.trim() ? RAW_API_BASE.replace(/\/+$/, "") : "";
+const BACKEND_BASE = normalizedRaw
+  ? normalizedRaw
+  : import.meta.env.DEV
+  ? DEFAULT_LOCAL
+  : DEFAULT_PROD;
 
 const baseHasApi = BACKEND_BASE.endsWith("/api");
 const apiUrl = (path) => {
