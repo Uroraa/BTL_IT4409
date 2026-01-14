@@ -4,7 +4,7 @@ import "../App.css";
 const DEFAULTS = {
   temp: { threshold: 26, dir: "high", unit: "°C" },
   humi: { threshold: 45, dir: "low", unit: "%" },
-  light: { threshold: 600, dir: "high", unit: "lux" },
+  light: { threshold: 600, dir: "low", unit: "lux" },
 };
 
 const STORAGE_KEY = "app:thresholds";
