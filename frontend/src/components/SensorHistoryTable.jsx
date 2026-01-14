@@ -1,13 +1,46 @@
 // src/components/SensorHistoryTable.jsx
 import React, { useEffect, useState, useMemo } from 'react';
-import { getSensorHistory, getLevelForValue } from '../api';
+import { getSensorHistory } from '../api';
 
+const DEFAULT_THRESHOLDS = {
+  temp: { threshold: 26, dir: 'high', unit: '°C' },
+  humi: { threshold: 45, dir: 'low', unit: '%' },
+  light: { threshold: 600, dir: 'low', unit: 'lux' },
+};
+
+const readThresholds = () => {
+  try {
+    const raw = localStorage.getItem('app:thresholds');
+    if (!raw) return DEFAULT_THRESHOLDS;
+    const parsed = JSON.parse(raw);
+    if (parsed.light && parsed.light.dir === 'high') {
+      return DEFAULT_THRESHOLDS;
+    }
+    return { ...DEFAULT_THRESHOLDS, ...parsed };
+  } catch {
+    return DEFAULT_THRESHOLDS;
+  }
+};
+
+const levelForValue = (sensorKey, value, thresholds) => {
+  const cfg = thresholds[sensorKey];
+  if (!cfg || value == null) return 'normal';
+  if (cfg.dir === 'high') {
+    if (value > cfg.threshold * 1.5) return 'critical';
+    if (value > cfg.threshold) return 'warning';
+    return 'normal';
+  }
+  if (value < cfg.threshold / 1.5) return 'critical';
+  if (value < cfg.threshold) return 'warning';
+  return 'normal';
+};
 
 export default function SensorHistoryTable() {
   const [sensor, setSensor] = useState('temp');
   const [rows, setRows] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
+  const [thresholds, setThresholds] = useState(readThresholds);
 
   const url = "http://localhost:6969/api/data/history?sensor=" + sensor + "&limit=240";
 
@@ -31,6 +64,19 @@ export default function SensorHistoryTable() {
     setPage(1);
   }, [pageSize, sensor]);
 
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'app:thresholds') setThresholds(readThresholds());
+    };
+    const onCustom = () => setThresholds(readThresholds());
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('thresholds:updated', onCustom);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('thresholds:updated', onCustom);
+    };
+  }, []);
+
   const total = rows.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -52,7 +98,7 @@ export default function SensorHistoryTable() {
     if (!rows || rows.length === 0) return;
     const header = 'Thời gian,type,Giá trị,Mức cảnh báo\n';
     const rowsCsv = rows.map(r => {
-      const level = getLevelForValue(sensor, r.value);
+      const level = levelForValue(sensor, r.value, thresholds);
       return `${csvEscape(r.time)},${csvEscape(sensorNames[sensor] || sensor)},${csvEscape(r.value)},${csvEscape(level || '')}`;
     }).join('\n');
     const blob = new Blob([header + rowsCsv], { type: 'text/csv' });
@@ -107,7 +153,7 @@ export default function SensorHistoryTable() {
           </thead>
           <tbody>
             {visible.map((r, i) => {
-              const computed = getLevelForValue(sensor, r.value);
+              const computed = levelForValue(sensor, r.value, thresholds);
               const show = computed && computed !== 'normal';
               return (
                 <tr key={i}>

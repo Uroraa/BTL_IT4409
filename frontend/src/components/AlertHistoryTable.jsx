@@ -1,6 +1,49 @@
 // src/components/AlertHistoryTable.jsx
 import React, { useEffect, useState, useMemo } from "react";
-import { getAlertHistory } from "../api";
+import { getSensorHistory } from "../api";
+
+const DEFAULT_THRESHOLDS = {
+  temp: { threshold: 26, dir: "high", unit: "°C" },
+  humi: { threshold: 45, dir: "low", unit: "%" },
+  light: { threshold: 600, dir: "low", unit: "lux" },
+};
+
+const readThresholds = () => {
+  try {
+    const raw = localStorage.getItem("app:thresholds");
+    if (!raw) return DEFAULT_THRESHOLDS;
+    const parsed = JSON.parse(raw);
+    if (parsed.light && parsed.light.dir === "high") {
+      return DEFAULT_THRESHOLDS;
+    }
+    return { ...DEFAULT_THRESHOLDS, ...parsed };
+  } catch {
+    return DEFAULT_THRESHOLDS;
+  }
+};
+
+const parseTimeMs = (value) => {
+  if (!value || typeof value !== "string") return 0;
+  const [timePart, datePart] = value.split(" ");
+  if (!timePart || !datePart) return 0;
+  const [hh, mm, ss] = timePart.split(":").map(Number);
+  const [dd, mo, yyyy] = datePart.split("/").map(Number);
+  if (!yyyy || !mo || !dd) return 0;
+  return new Date(yyyy, mo - 1, dd, hh || 0, mm || 0, ss || 0).getTime();
+};
+
+const levelForValue = (sensorKey, value, thresholds) => {
+  const cfg = thresholds[sensorKey];
+  if (!cfg || value == null) return "normal";
+  if (cfg.dir === "high") {
+    if (value > cfg.threshold * 1.5) return "critical";
+    if (value > cfg.threshold) return "warning";
+    return "normal";
+  }
+  if (value < cfg.threshold / 1.5) return "critical";
+  if (value < cfg.threshold) return "warning";
+  return "normal";
+};
 
 export default function AlertHistoryTable() {
   const [alerts, setAlerts] = useState([]);
@@ -13,10 +56,34 @@ export default function AlertHistoryTable() {
     // request latest 20 minutes sampled every 5s -> 20*60/5 = 240
     const fetchLatest = async () => {
       try {
-        const data = await getAlertHistory(240, { force: true });
-        if (mounted && Array.isArray(data)) {
-          setAlerts([...data].reverse());
-        }
+        const thresholds = readThresholds();
+        const count = 240;
+        const sensors = ["temp", "humi", "light"];
+        const results = await Promise.all(
+          sensors.map((key) => getSensorHistory(key, count, { force: true }))
+        );
+        if (!mounted) return;
+        const merged = [];
+        results.forEach((hist, idx) => {
+          const key = sensors[idx];
+          if (!Array.isArray(hist)) return;
+          hist.forEach((point) => {
+            const level = levelForValue(key, point.value, thresholds);
+            if (level !== "normal") {
+              merged.push({
+                time: point.time,
+                sensorKey: key,
+                sensor: key,
+                value: point.value,
+                level,
+                _ts: parseTimeMs(point.time),
+              });
+            }
+          });
+        });
+        merged.sort((a, b) => (b._ts || 0) - (a._ts || 0));
+        const cleaned = merged.slice(0, count).map(({ _ts, ...rest }) => rest);
+        setAlerts(cleaned);
       } catch (err) {
         console.error("Error fetching alert history:", err);
         if (mounted) setAlerts([]);

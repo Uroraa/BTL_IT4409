@@ -23,12 +23,13 @@ function Dashboard() {
 
   const RAW_GRAFANA = import.meta.env.VITE_GRAFANA_URL;
   const DEFAULT_GRAFANA = "http://localhost:3001";
+  const DEFAULT_GRAFANA_PROD = "https://btl-it4409-1.onrender.com";
   const GRAFANA_BASE =
     RAW_GRAFANA && RAW_GRAFANA.trim()
       ? RAW_GRAFANA.replace(/\/+$/, "")
       : import.meta.env.DEV
       ? DEFAULT_GRAFANA
-      : "";
+      : DEFAULT_GRAFANA_PROD;
 
   const grafanaUrl = (path) => {
     const cleanedPath = path.startsWith("/") ? path : `/${path}`;
