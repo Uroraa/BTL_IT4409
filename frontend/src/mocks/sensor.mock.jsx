@@ -1,8 +1,8 @@
 // ===== Threshold config (GIỐNG Dashboard) =====
 const thresholds = {
-  temp: { name: 'Nhiệt độ', threshold: 35, dir: 'high', unit: '°C' },
-  humi: { name: 'Độ ẩm', threshold: 40, dir: 'low', unit: '%' },
-  light: { name: 'Ánh sáng', threshold: 50, dir: 'low', unit: 'lux' }
+  temp: { name: "Nhiệt độ", threshold: 26, dir: "high", unit: "°C" },
+  humi: { name: "Độ ẩm", threshold: 45, dir: "low", unit: "%" },
+  light: { name: "Ánh sáng", threshold: 600, dir: "low", unit: "lux" },
 };
 
 // ===== Utils =====
@@ -16,18 +16,18 @@ export function generateSensorMock(count = 10) {
   const spacing = 5000; // 5 seconds
   return Array.from({ length: count }).map((_, i) => {
     const t = new Date(now - (count - 1 - i) * spacing);
-    const hh = String(t.getHours()).padStart(2, '0');
-    const mm = String(t.getMinutes()).padStart(2, '0');
-    const ss = String(t.getSeconds()).padStart(2, '0');
+    const hh = String(t.getHours()).padStart(2, "0");
+    const mm = String(t.getMinutes()).padStart(2, "0");
+    const ss = String(t.getSeconds()).padStart(2, "0");
     return {
       time: {
         minute: String(Math.floor((now - (count - 1 - i) * spacing) / 60000)),
         display: `${hh}:${mm}:${ss}`,
-        ts: t.getTime()
+        ts: t.getTime(),
       },
       temp: rand(10, 100),
       humi: rand(10, 100),
-      light: rand(10, 100)
+      light: rand(10, 100),
     };
   });
 }
@@ -40,13 +40,13 @@ export function generateSensorHistory(sensorKey, count = 10) {
   const spacing = 5000; // 5 seconds
   for (let i = 0; i < count; i++) {
     const t = new Date(now - (count - 1 - i) * spacing);
-    const hh = String(t.getHours()).padStart(2, '0');
-    const mm = String(t.getMinutes()).padStart(2, '0');
-    const ss = String(t.getSeconds()).padStart(2, '0');
+    const hh = String(t.getHours()).padStart(2, "0");
+    const mm = String(t.getMinutes()).padStart(2, "0");
+    const ss = String(t.getSeconds()).padStart(2, "0");
 
     arr.push({
       time: `${hh}:${mm}:${ss}`,
-      value: rand(10, 100)
+      value: rand(10, 100),
     });
   }
 
@@ -56,38 +56,38 @@ export function generateSensorHistory(sensorKey, count = 10) {
 // ===== Alert level logic (GIỐNG Dashboard) =====
 function getLevelForValue(sensorKey, value) {
   const cfg = thresholds[sensorKey];
-  if (!cfg) return 'normal';
+  if (!cfg) return "normal";
 
-  if (cfg.dir === 'high') {
-    if (value > cfg.threshold * 1.5) return 'critical';
-    if (value > cfg.threshold) return 'warning';
-    return 'normal';
+  if (cfg.dir === "high") {
+    if (value > cfg.threshold * 1.5) return "critical";
+    if (value > cfg.threshold) return "warning";
+    return "normal";
   } else {
-    if (value < cfg.threshold / 1.5) return 'critical';
-    if (value < cfg.threshold) return 'warning';
-    return 'normal';
+    if (value < cfg.threshold / 1.5) return "critical";
+    if (value < cfg.threshold) return "warning";
+    return "normal";
   }
 }
 
 // ===== MOCK API: async history per sensor =====
 export async function getSensorHistory(sensorKey, count = 10) {
-  await new Promise(r => setTimeout(r, 120)); // giả lập latency
+  await new Promise((r) => setTimeout(r, 120)); // giả lập latency
   return generateSensorHistory(sensorKey, count);
 }
 
 // ===== MOCK API: alert history (tổng hợp từ các sensor) =====
 export async function getAlertHistory(count = 10) {
-  await new Promise(r => setTimeout(r, 120)); // giả lập latency
+  await new Promise((r) => setTimeout(r, 120)); // giả lập latency
 
-  const sensors = ['temp', 'humi', 'light'];
+  const sensors = ["temp", "humi", "light"];
   const alerts = [];
 
-  sensors.forEach(sensorKey => {
+  sensors.forEach((sensorKey) => {
     const hist = generateSensorHistory(sensorKey, count);
 
-    hist.forEach(point => {
+    hist.forEach((point) => {
       const level = getLevelForValue(sensorKey, point.value);
-      if (level !== 'normal') {
+      if (level !== "normal") {
         alerts.push({
           time: point.time,
           sensorKey,
@@ -95,7 +95,7 @@ export async function getAlertHistory(count = 10) {
           sensorName: thresholds[sensorKey].name,
           value: point.value,
           unit: thresholds[sensorKey].unit,
-          level
+          level,
         });
       }
     });

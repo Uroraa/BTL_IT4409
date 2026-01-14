@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import '../App.css';
+import React, { useEffect, useState } from "react";
+import "../App.css";
 
 const DEFAULTS = {
-  temp: { threshold: 26, dir: 'high', unit: '°C' },
-  humi: { threshold: 45, dir: 'low', unit: '%' },
-  light: { threshold: 60, dir: 'high', unit: 'lux' }
+  temp: { threshold: 26, dir: "high", unit: "°C" },
+  humi: { threshold: 45, dir: "low", unit: "%" },
+  light: { threshold: 600, dir: "high", unit: "lux" },
 };
 
-const STORAGE_KEY = 'app:thresholds';
+const STORAGE_KEY = "app:thresholds";
 
 function loadThresholds() {
   try {
@@ -33,12 +33,12 @@ export default function Thresholds() {
   }, [saved]);
 
   const handleChange = (key, field, rawValue) => {
-    setValues(prev => ({
+    setValues((prev) => ({
       ...prev,
       [key]: {
         ...prev[key],
-        [field]: field === 'threshold' ? Number(rawValue) : rawValue
-      }
+        [field]: field === "threshold" ? Number(rawValue) : rawValue,
+      },
     }));
   };
 
@@ -47,11 +47,13 @@ export default function Thresholds() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
       // notify other open tabs/components
       try {
-        window.dispatchEvent(new CustomEvent('thresholds:updated', { detail: values }));
+        window.dispatchEvent(
+          new CustomEvent("thresholds:updated", { detail: values })
+        );
       } catch {}
       setSaved(true);
     } catch (err) {
-      console.warn('save thresholds error', err);
+      console.warn("save thresholds error", err);
     }
   };
 
@@ -72,22 +74,35 @@ export default function Thresholds() {
             <div>Đơn vị</div>
           </div>
 
-          {['temp', 'humi', 'light'].map(key => (
+          {["temp", "humi", "light"].map((key) => (
             <div key={key} className="threshold-row">
-              <div className="sensor-label">{key === 'temp' ? 'Nhiệt độ' : key === 'humi' ? 'Độ ẩm' : 'Ánh sáng'}</div>
+              <div className="sensor-label">
+                {key === "temp"
+                  ? "Nhiệt độ"
+                  : key === "humi"
+                  ? "Độ ẩm"
+                  : "Ánh sáng"}
+              </div>
 
               <div className="threshold-cell">
                 <input
                   className="threshold-input"
                   type="number"
                   value={values[key].threshold}
-                  onChange={e => handleChange(key, 'threshold', e.target.value)}
+                  onChange={(e) =>
+                    handleChange(key, "threshold", e.target.value)
+                  }
                   aria-label={`${key}-threshold`}
                 />
               </div>
 
               <div className="direction-cell">
-                <select className="direction-select" value={values[key].dir} onChange={e => handleChange(key, 'dir', e.target.value)} aria-label={`${key}-dir`}>
+                <select
+                  className="direction-select"
+                  value={values[key].dir}
+                  onChange={(e) => handleChange(key, "dir", e.target.value)}
+                  aria-label={`${key}-dir`}
+                >
                   <option value="high">Cao (giám sát vượt trên)</option>
                   <option value="low">Thấp (giám sát xuống dưới)</option>
                 </select>
@@ -98,9 +113,13 @@ export default function Thresholds() {
           ))}
 
           <div className="grid-actions">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button className="btn-primary" onClick={save}>Lưu</button>
-              <button className="btn-ghost" onClick={reset}>Khôi phục mặc định</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <button className="btn-primary" onClick={save}>
+                Lưu
+              </button>
+              <button className="btn-ghost" onClick={reset}>
+                Khôi phục mặc định
+              </button>
               {saved && <span className="saved-indicator">Đã lưu</span>}
             </div>
           </div>
